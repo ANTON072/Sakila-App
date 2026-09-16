@@ -364,7 +364,7 @@ export const staff = mysqlTable(
       }),
     active: boolean().default(true).notNull(),
     username: varchar({ length: 16 }).notNull(),
-    password: varchar({ length: 40 }).charSet("utf8mb4").collate("utf8mb4_bin"),
+    password: varchar({ length: 255 }).charSet("utf8mb4").collate("utf8mb4_bin"),
     lastUpdate: timestamp("last_update").defaultNow().onUpdateNow().notNull(),
   },
   (table) => [

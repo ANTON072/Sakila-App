@@ -1,0 +1,2251 @@
+{
+  "version": "6",
+  "dialect": "mysql",
+  "id": "ada8b23c-9b5e-47e2-94e3-db414e5f000c",
+  "prevIds": [
+    "fa8ac94c-f5dd-467e-b43a-7bf4b4cd7d52"
+  ],
+  "ddl": [
+    {
+      "name": "actor",
+      "entityType": "tables"
+    },
+    {
+      "name": "address",
+      "entityType": "tables"
+    },
+    {
+      "name": "category",
+      "entityType": "tables"
+    },
+    {
+      "name": "city",
+      "entityType": "tables"
+    },
+    {
+      "name": "country",
+      "entityType": "tables"
+    },
+    {
+      "name": "customer",
+      "entityType": "tables"
+    },
+    {
+      "name": "film",
+      "entityType": "tables"
+    },
+    {
+      "name": "film_actor",
+      "entityType": "tables"
+    },
+    {
+      "name": "film_category",
+      "entityType": "tables"
+    },
+    {
+      "name": "film_text",
+      "entityType": "tables"
+    },
+    {
+      "name": "inventory",
+      "entityType": "tables"
+    },
+    {
+      "name": "language",
+      "entityType": "tables"
+    },
+    {
+      "name": "payment",
+      "entityType": "tables"
+    },
+    {
+      "name": "rental",
+      "entityType": "tables"
+    },
+    {
+      "name": "staff",
+      "entityType": "tables"
+    },
+    {
+      "name": "store",
+      "entityType": "tables"
+    },
+    {
+      "type": "smallint unsigned",
+      "notNull": true,
+      "autoIncrement": true,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "actor_id",
+      "entityType": "columns",
+      "table": "actor"
+    },
+    {
+      "type": "varchar(45)",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "first_name",
+      "entityType": "columns",
+      "table": "actor"
+    },
+    {
+      "type": "varchar(45)",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "last_name",
+      "entityType": "columns",
+      "table": "actor"
+    },
+    {
+      "type": "timestamp",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": "(now())",
+      "onUpdateNow": true,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "last_update",
+      "entityType": "columns",
+      "table": "actor"
+    },
+    {
+      "type": "smallint unsigned",
+      "notNull": true,
+      "autoIncrement": true,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "address_id",
+      "entityType": "columns",
+      "table": "address"
+    },
+    {
+      "type": "varchar(50)",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "address",
+      "entityType": "columns",
+      "table": "address"
+    },
+    {
+      "type": "varchar(50)",
+      "notNull": false,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "address2",
+      "entityType": "columns",
+      "table": "address"
+    },
+    {
+      "type": "varchar(20)",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "district",
+      "entityType": "columns",
+      "table": "address"
+    },
+    {
+      "type": "smallint unsigned",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "city_id",
+      "entityType": "columns",
+      "table": "address"
+    },
+    {
+      "type": "varchar(10)",
+      "notNull": false,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "postal_code",
+      "entityType": "columns",
+      "table": "address"
+    },
+    {
+      "type": "varchar(20)",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "phone",
+      "entityType": "columns",
+      "table": "address"
+    },
+    {
+      "type": "geometry",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "location",
+      "entityType": "columns",
+      "table": "address"
+    },
+    {
+      "type": "timestamp",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": "(now())",
+      "onUpdateNow": true,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "last_update",
+      "entityType": "columns",
+      "table": "address"
+    },
+    {
+      "type": "tinyint unsigned",
+      "notNull": true,
+      "autoIncrement": true,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "category_id",
+      "entityType": "columns",
+      "table": "category"
+    },
+    {
+      "type": "varchar(25)",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "name",
+      "entityType": "columns",
+      "table": "category"
+    },
+    {
+      "type": "timestamp",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": "(now())",
+      "onUpdateNow": true,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "last_update",
+      "entityType": "columns",
+      "table": "category"
+    },
+    {
+      "type": "smallint unsigned",
+      "notNull": true,
+      "autoIncrement": true,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "city_id",
+      "entityType": "columns",
+      "table": "city"
+    },
+    {
+      "type": "varchar(50)",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "city",
+      "entityType": "columns",
+      "table": "city"
+    },
+    {
+      "type": "smallint unsigned",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "country_id",
+      "entityType": "columns",
+      "table": "city"
+    },
+    {
+      "type": "timestamp",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": "(now())",
+      "onUpdateNow": true,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "last_update",
+      "entityType": "columns",
+      "table": "city"
+    },
+    {
+      "type": "smallint unsigned",
+      "notNull": true,
+      "autoIncrement": true,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "country_id",
+      "entityType": "columns",
+      "table": "country"
+    },
+    {
+      "type": "varchar(50)",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "country",
+      "entityType": "columns",
+      "table": "country"
+    },
+    {
+      "type": "timestamp",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": "(now())",
+      "onUpdateNow": true,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "last_update",
+      "entityType": "columns",
+      "table": "country"
+    },
+    {
+      "type": "smallint unsigned",
+      "notNull": true,
+      "autoIncrement": true,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "customer_id",
+      "entityType": "columns",
+      "table": "customer"
+    },
+    {
+      "type": "tinyint unsigned",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "store_id",
+      "entityType": "columns",
+      "table": "customer"
+    },
+    {
+      "type": "varchar(45)",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "first_name",
+      "entityType": "columns",
+      "table": "customer"
+    },
+    {
+      "type": "varchar(45)",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "last_name",
+      "entityType": "columns",
+      "table": "customer"
+    },
+    {
+      "type": "varchar(50)",
+      "notNull": false,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "email",
+      "entityType": "columns",
+      "table": "customer"
+    },
+    {
+      "type": "smallint unsigned",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "address_id",
+      "entityType": "columns",
+      "table": "customer"
+    },
+    {
+      "type": "boolean",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": "true",
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "active",
+      "entityType": "columns",
+      "table": "customer"
+    },
+    {
+      "type": "datetime",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "create_date",
+      "entityType": "columns",
+      "table": "customer"
+    },
+    {
+      "type": "timestamp",
+      "notNull": false,
+      "autoIncrement": false,
+      "default": "(now())",
+      "onUpdateNow": true,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "last_update",
+      "entityType": "columns",
+      "table": "customer"
+    },
+    {
+      "type": "smallint unsigned",
+      "notNull": true,
+      "autoIncrement": true,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "film_id",
+      "entityType": "columns",
+      "table": "film"
+    },
+    {
+      "type": "varchar(128)",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "title",
+      "entityType": "columns",
+      "table": "film"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "description",
+      "entityType": "columns",
+      "table": "film"
+    },
+    {
+      "type": "year",
+      "notNull": false,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "release_year",
+      "entityType": "columns",
+      "table": "film"
+    },
+    {
+      "type": "tinyint unsigned",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "language_id",
+      "entityType": "columns",
+      "table": "film"
+    },
+    {
+      "type": "tinyint unsigned",
+      "notNull": false,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "original_language_id",
+      "entityType": "columns",
+      "table": "film"
+    },
+    {
+      "type": "tinyint unsigned",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": "3",
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "rental_duration",
+      "entityType": "columns",
+      "table": "film"
+    },
+    {
+      "type": "decimal(4,2)",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": "(4.99)",
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "rental_rate",
+      "entityType": "columns",
+      "table": "film"
+    },
+    {
+      "type": "smallint unsigned",
+      "notNull": false,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "length",
+      "entityType": "columns",
+      "table": "film"
+    },
+    {
+      "type": "decimal(5,2)",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": "(19.99)",
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "replacement_cost",
+      "entityType": "columns",
+      "table": "film"
+    },
+    {
+      "type": "enum('G','PG','PG-13','R','NC-17')",
+      "notNull": false,
+      "autoIncrement": false,
+      "default": "'G'",
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "rating",
+      "entityType": "columns",
+      "table": "film"
+    },
+    {
+      "type": "set('trailers','commentaries','deleted scenes','behind the scenes')",
+      "notNull": false,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "special_features",
+      "entityType": "columns",
+      "table": "film"
+    },
+    {
+      "type": "timestamp",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": "(now())",
+      "onUpdateNow": true,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "last_update",
+      "entityType": "columns",
+      "table": "film"
+    },
+    {
+      "type": "smallint unsigned",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "actor_id",
+      "entityType": "columns",
+      "table": "film_actor"
+    },
+    {
+      "type": "smallint unsigned",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "film_id",
+      "entityType": "columns",
+      "table": "film_actor"
+    },
+    {
+      "type": "timestamp",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": "(now())",
+      "onUpdateNow": true,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "last_update",
+      "entityType": "columns",
+      "table": "film_actor"
+    },
+    {
+      "type": "smallint unsigned",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "film_id",
+      "entityType": "columns",
+      "table": "film_category"
+    },
+    {
+      "type": "tinyint unsigned",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "category_id",
+      "entityType": "columns",
+      "table": "film_category"
+    },
+    {
+      "type": "timestamp",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": "(now())",
+      "onUpdateNow": true,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "last_update",
+      "entityType": "columns",
+      "table": "film_category"
+    },
+    {
+      "type": "smallint unsigned",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "film_id",
+      "entityType": "columns",
+      "table": "film_text"
+    },
+    {
+      "type": "varchar(255)",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "title",
+      "entityType": "columns",
+      "table": "film_text"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "description",
+      "entityType": "columns",
+      "table": "film_text"
+    },
+    {
+      "type": "mediumint unsigned",
+      "notNull": true,
+      "autoIncrement": true,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "inventory_id",
+      "entityType": "columns",
+      "table": "inventory"
+    },
+    {
+      "type": "smallint unsigned",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "film_id",
+      "entityType": "columns",
+      "table": "inventory"
+    },
+    {
+      "type": "tinyint unsigned",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "store_id",
+      "entityType": "columns",
+      "table": "inventory"
+    },
+    {
+      "type": "timestamp",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": "(now())",
+      "onUpdateNow": true,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "last_update",
+      "entityType": "columns",
+      "table": "inventory"
+    },
+    {
+      "type": "tinyint unsigned",
+      "notNull": true,
+      "autoIncrement": true,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "language_id",
+      "entityType": "columns",
+      "table": "language"
+    },
+    {
+      "type": "char(20)",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "name",
+      "entityType": "columns",
+      "table": "language"
+    },
+    {
+      "type": "timestamp",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": "(now())",
+      "onUpdateNow": true,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "last_update",
+      "entityType": "columns",
+      "table": "language"
+    },
+    {
+      "type": "smallint unsigned",
+      "notNull": true,
+      "autoIncrement": true,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "payment_id",
+      "entityType": "columns",
+      "table": "payment"
+    },
+    {
+      "type": "smallint unsigned",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "customer_id",
+      "entityType": "columns",
+      "table": "payment"
+    },
+    {
+      "type": "tinyint unsigned",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "staff_id",
+      "entityType": "columns",
+      "table": "payment"
+    },
+    {
+      "type": "int",
+      "notNull": false,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "rental_id",
+      "entityType": "columns",
+      "table": "payment"
+    },
+    {
+      "type": "decimal(5,2)",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "amount",
+      "entityType": "columns",
+      "table": "payment"
+    },
+    {
+      "type": "datetime",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "payment_date",
+      "entityType": "columns",
+      "table": "payment"
+    },
+    {
+      "type": "timestamp",
+      "notNull": false,
+      "autoIncrement": false,
+      "default": "(now())",
+      "onUpdateNow": true,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "last_update",
+      "entityType": "columns",
+      "table": "payment"
+    },
+    {
+      "type": "int",
+      "notNull": true,
+      "autoIncrement": true,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "rental_id",
+      "entityType": "columns",
+      "table": "rental"
+    },
+    {
+      "type": "datetime",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "rental_date",
+      "entityType": "columns",
+      "table": "rental"
+    },
+    {
+      "type": "mediumint unsigned",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "inventory_id",
+      "entityType": "columns",
+      "table": "rental"
+    },
+    {
+      "type": "smallint unsigned",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "customer_id",
+      "entityType": "columns",
+      "table": "rental"
+    },
+    {
+      "type": "datetime",
+      "notNull": false,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "return_date",
+      "entityType": "columns",
+      "table": "rental"
+    },
+    {
+      "type": "tinyint unsigned",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "staff_id",
+      "entityType": "columns",
+      "table": "rental"
+    },
+    {
+      "type": "timestamp",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": "(now())",
+      "onUpdateNow": true,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "last_update",
+      "entityType": "columns",
+      "table": "rental"
+    },
+    {
+      "type": "tinyint unsigned",
+      "notNull": true,
+      "autoIncrement": true,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "staff_id",
+      "entityType": "columns",
+      "table": "staff"
+    },
+    {
+      "type": "varchar(45)",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "first_name",
+      "entityType": "columns",
+      "table": "staff"
+    },
+    {
+      "type": "varchar(45)",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "last_name",
+      "entityType": "columns",
+      "table": "staff"
+    },
+    {
+      "type": "smallint unsigned",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "address_id",
+      "entityType": "columns",
+      "table": "staff"
+    },
+    {
+      "type": "blob",
+      "notNull": false,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "picture",
+      "entityType": "columns",
+      "table": "staff"
+    },
+    {
+      "type": "varchar(50)",
+      "notNull": false,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "email",
+      "entityType": "columns",
+      "table": "staff"
+    },
+    {
+      "type": "tinyint unsigned",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "store_id",
+      "entityType": "columns",
+      "table": "staff"
+    },
+    {
+      "type": "boolean",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": "true",
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "active",
+      "entityType": "columns",
+      "table": "staff"
+    },
+    {
+      "type": "varchar(16)",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "username",
+      "entityType": "columns",
+      "table": "staff"
+    },
+    {
+      "type": "varchar(255)",
+      "notNull": false,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": "utf8mb4",
+      "collation": "utf8mb4_bin",
+      "generated": null,
+      "name": "password",
+      "entityType": "columns",
+      "table": "staff"
+    },
+    {
+      "type": "timestamp",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": "(now())",
+      "onUpdateNow": true,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "last_update",
+      "entityType": "columns",
+      "table": "staff"
+    },
+    {
+      "type": "tinyint unsigned",
+      "notNull": true,
+      "autoIncrement": true,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "store_id",
+      "entityType": "columns",
+      "table": "store"
+    },
+    {
+      "type": "tinyint unsigned",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "manager_staff_id",
+      "entityType": "columns",
+      "table": "store"
+    },
+    {
+      "type": "smallint unsigned",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "address_id",
+      "entityType": "columns",
+      "table": "store"
+    },
+    {
+      "type": "timestamp",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": "(now())",
+      "onUpdateNow": true,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "last_update",
+      "entityType": "columns",
+      "table": "store"
+    },
+    {
+      "columns": [
+        "actor_id",
+        "film_id"
+      ],
+      "name": "PRIMARY",
+      "table": "film_actor",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "film_id",
+        "category_id"
+      ],
+      "name": "PRIMARY",
+      "table": "film_category",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "actor_id"
+      ],
+      "name": "PRIMARY",
+      "table": "actor",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "address_id"
+      ],
+      "name": "PRIMARY",
+      "table": "address",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "category_id"
+      ],
+      "name": "PRIMARY",
+      "table": "category",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "city_id"
+      ],
+      "name": "PRIMARY",
+      "table": "city",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "country_id"
+      ],
+      "name": "PRIMARY",
+      "table": "country",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "customer_id"
+      ],
+      "name": "PRIMARY",
+      "table": "customer",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "film_id"
+      ],
+      "name": "PRIMARY",
+      "table": "film",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "film_id"
+      ],
+      "name": "PRIMARY",
+      "table": "film_text",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "inventory_id"
+      ],
+      "name": "PRIMARY",
+      "table": "inventory",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "language_id"
+      ],
+      "name": "PRIMARY",
+      "table": "language",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "payment_id"
+      ],
+      "name": "PRIMARY",
+      "table": "payment",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "rental_id"
+      ],
+      "name": "PRIMARY",
+      "table": "rental",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "staff_id"
+      ],
+      "name": "PRIMARY",
+      "table": "staff",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "store_id"
+      ],
+      "name": "PRIMARY",
+      "table": "store",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        {
+          "value": "last_name",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "using": null,
+      "algorithm": null,
+      "lock": null,
+      "nameExplicit": true,
+      "name": "idx_actor_last_name",
+      "entityType": "indexes",
+      "table": "actor"
+    },
+    {
+      "columns": [
+        {
+          "value": "location",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "using": null,
+      "algorithm": null,
+      "lock": null,
+      "nameExplicit": true,
+      "name": "idx_location",
+      "entityType": "indexes",
+      "table": "address"
+    },
+    {
+      "columns": [
+        {
+          "value": "city_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "using": null,
+      "algorithm": null,
+      "lock": null,
+      "nameExplicit": true,
+      "name": "idx_fk_city_id",
+      "entityType": "indexes",
+      "table": "address"
+    },
+    {
+      "columns": [
+        {
+          "value": "country_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "using": null,
+      "algorithm": null,
+      "lock": null,
+      "nameExplicit": true,
+      "name": "idx_fk_country_id",
+      "entityType": "indexes",
+      "table": "city"
+    },
+    {
+      "columns": [
+        {
+          "value": "last_name",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "using": null,
+      "algorithm": null,
+      "lock": null,
+      "nameExplicit": true,
+      "name": "idx_last_name",
+      "entityType": "indexes",
+      "table": "customer"
+    },
+    {
+      "columns": [
+        {
+          "value": "address_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "using": null,
+      "algorithm": null,
+      "lock": null,
+      "nameExplicit": true,
+      "name": "idx_fk_address_id",
+      "entityType": "indexes",
+      "table": "customer"
+    },
+    {
+      "columns": [
+        {
+          "value": "store_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "using": null,
+      "algorithm": null,
+      "lock": null,
+      "nameExplicit": true,
+      "name": "idx_fk_store_id",
+      "entityType": "indexes",
+      "table": "customer"
+    },
+    {
+      "columns": [
+        {
+          "value": "original_language_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "using": null,
+      "algorithm": null,
+      "lock": null,
+      "nameExplicit": true,
+      "name": "idx_fk_original_language_id",
+      "entityType": "indexes",
+      "table": "film"
+    },
+    {
+      "columns": [
+        {
+          "value": "language_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "using": null,
+      "algorithm": null,
+      "lock": null,
+      "nameExplicit": true,
+      "name": "idx_fk_language_id",
+      "entityType": "indexes",
+      "table": "film"
+    },
+    {
+      "columns": [
+        {
+          "value": "title",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "using": null,
+      "algorithm": null,
+      "lock": null,
+      "nameExplicit": true,
+      "name": "idx_title",
+      "entityType": "indexes",
+      "table": "film"
+    },
+    {
+      "columns": [
+        {
+          "value": "film_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "using": null,
+      "algorithm": null,
+      "lock": null,
+      "nameExplicit": true,
+      "name": "idx_fk_film_id",
+      "entityType": "indexes",
+      "table": "film_actor"
+    },
+    {
+      "columns": [
+        {
+          "value": "title",
+          "isExpression": false
+        },
+        {
+          "value": "description",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "using": null,
+      "algorithm": null,
+      "lock": null,
+      "nameExplicit": true,
+      "name": "idx_title_description",
+      "entityType": "indexes",
+      "table": "film_text"
+    },
+    {
+      "columns": [
+        {
+          "value": "store_id",
+          "isExpression": false
+        },
+        {
+          "value": "film_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "using": null,
+      "algorithm": null,
+      "lock": null,
+      "nameExplicit": true,
+      "name": "idx_store_id_film_id",
+      "entityType": "indexes",
+      "table": "inventory"
+    },
+    {
+      "columns": [
+        {
+          "value": "film_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "using": null,
+      "algorithm": null,
+      "lock": null,
+      "nameExplicit": true,
+      "name": "idx_fk_film_id",
+      "entityType": "indexes",
+      "table": "inventory"
+    },
+    {
+      "columns": [
+        {
+          "value": "customer_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "using": null,
+      "algorithm": null,
+      "lock": null,
+      "nameExplicit": true,
+      "name": "idx_fk_customer_id",
+      "entityType": "indexes",
+      "table": "payment"
+    },
+    {
+      "columns": [
+        {
+          "value": "staff_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "using": null,
+      "algorithm": null,
+      "lock": null,
+      "nameExplicit": true,
+      "name": "idx_fk_staff_id",
+      "entityType": "indexes",
+      "table": "payment"
+    },
+    {
+      "columns": [
+        {
+          "value": "staff_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "using": null,
+      "algorithm": null,
+      "lock": null,
+      "nameExplicit": true,
+      "name": "idx_fk_staff_id",
+      "entityType": "indexes",
+      "table": "rental"
+    },
+    {
+      "columns": [
+        {
+          "value": "customer_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "using": null,
+      "algorithm": null,
+      "lock": null,
+      "nameExplicit": true,
+      "name": "idx_fk_customer_id",
+      "entityType": "indexes",
+      "table": "rental"
+    },
+    {
+      "columns": [
+        {
+          "value": "inventory_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "using": null,
+      "algorithm": null,
+      "lock": null,
+      "nameExplicit": true,
+      "name": "idx_fk_inventory_id",
+      "entityType": "indexes",
+      "table": "rental"
+    },
+    {
+      "columns": [
+        {
+          "value": "rental_date",
+          "isExpression": false
+        },
+        {
+          "value": "inventory_id",
+          "isExpression": false
+        },
+        {
+          "value": "customer_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": true,
+      "using": null,
+      "algorithm": null,
+      "lock": null,
+      "nameExplicit": true,
+      "name": "rental_date",
+      "entityType": "indexes",
+      "table": "rental"
+    },
+    {
+      "columns": [
+        {
+          "value": "address_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "using": null,
+      "algorithm": null,
+      "lock": null,
+      "nameExplicit": true,
+      "name": "idx_fk_address_id",
+      "entityType": "indexes",
+      "table": "staff"
+    },
+    {
+      "columns": [
+        {
+          "value": "store_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "using": null,
+      "algorithm": null,
+      "lock": null,
+      "nameExplicit": true,
+      "name": "idx_fk_store_id",
+      "entityType": "indexes",
+      "table": "staff"
+    },
+    {
+      "columns": [
+        {
+          "value": "address_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "using": null,
+      "algorithm": null,
+      "lock": null,
+      "nameExplicit": true,
+      "name": "idx_fk_address_id",
+      "entityType": "indexes",
+      "table": "store"
+    },
+    {
+      "columns": [
+        {
+          "value": "manager_staff_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": true,
+      "using": null,
+      "algorithm": null,
+      "lock": null,
+      "nameExplicit": true,
+      "name": "idx_unique_manager",
+      "entityType": "indexes",
+      "table": "store"
+    },
+    {
+      "columns": [
+        "city_id"
+      ],
+      "tableTo": "city",
+      "columnsTo": [
+        "city_id"
+      ],
+      "onUpdate": "CASCADE",
+      "onDelete": "RESTRICT",
+      "nameExplicit": false,
+      "name": "address_city_id_city_city_id_fkey",
+      "entityType": "fks",
+      "table": "address"
+    },
+    {
+      "columns": [
+        "country_id"
+      ],
+      "tableTo": "country",
+      "columnsTo": [
+        "country_id"
+      ],
+      "onUpdate": "CASCADE",
+      "onDelete": "RESTRICT",
+      "nameExplicit": false,
+      "name": "city_country_id_country_country_id_fkey",
+      "entityType": "fks",
+      "table": "city"
+    },
+    {
+      "columns": [
+        "store_id"
+      ],
+      "tableTo": "store",
+      "columnsTo": [
+        "store_id"
+      ],
+      "onUpdate": "CASCADE",
+      "onDelete": "RESTRICT",
+      "nameExplicit": false,
+      "name": "customer_store_id_store_store_id_fkey",
+      "entityType": "fks",
+      "table": "customer"
+    },
+    {
+      "columns": [
+        "address_id"
+      ],
+      "tableTo": "address",
+      "columnsTo": [
+        "address_id"
+      ],
+      "onUpdate": "CASCADE",
+      "onDelete": "RESTRICT",
+      "nameExplicit": false,
+      "name": "customer_address_id_address_address_id_fkey",
+      "entityType": "fks",
+      "table": "customer"
+    },
+    {
+      "columns": [
+        "language_id"
+      ],
+      "tableTo": "language",
+      "columnsTo": [
+        "language_id"
+      ],
+      "onUpdate": "CASCADE",
+      "onDelete": "RESTRICT",
+      "nameExplicit": false,
+      "name": "film_language_id_language_language_id_fkey",
+      "entityType": "fks",
+      "table": "film"
+    },
+    {
+      "columns": [
+        "original_language_id"
+      ],
+      "tableTo": "language",
+      "columnsTo": [
+        "language_id"
+      ],
+      "onUpdate": "CASCADE",
+      "onDelete": "RESTRICT",
+      "nameExplicit": false,
+      "name": "film_original_language_id_language_language_id_fkey",
+      "entityType": "fks",
+      "table": "film"
+    },
+    {
+      "columns": [
+        "actor_id"
+      ],
+      "tableTo": "actor",
+      "columnsTo": [
+        "actor_id"
+      ],
+      "onUpdate": "CASCADE",
+      "onDelete": "RESTRICT",
+      "nameExplicit": false,
+      "name": "film_actor_actor_id_actor_actor_id_fkey",
+      "entityType": "fks",
+      "table": "film_actor"
+    },
+    {
+      "columns": [
+        "film_id"
+      ],
+      "tableTo": "film",
+      "columnsTo": [
+        "film_id"
+      ],
+      "onUpdate": "CASCADE",
+      "onDelete": "RESTRICT",
+      "nameExplicit": false,
+      "name": "film_actor_film_id_film_film_id_fkey",
+      "entityType": "fks",
+      "table": "film_actor"
+    },
+    {
+      "columns": [
+        "film_id"
+      ],
+      "tableTo": "film",
+      "columnsTo": [
+        "film_id"
+      ],
+      "onUpdate": "CASCADE",
+      "onDelete": "RESTRICT",
+      "nameExplicit": false,
+      "name": "film_category_film_id_film_film_id_fkey",
+      "entityType": "fks",
+      "table": "film_category"
+    },
+    {
+      "columns": [
+        "category_id"
+      ],
+      "tableTo": "category",
+      "columnsTo": [
+        "category_id"
+      ],
+      "onUpdate": "CASCADE",
+      "onDelete": "RESTRICT",
+      "nameExplicit": false,
+      "name": "film_category_category_id_category_category_id_fkey",
+      "entityType": "fks",
+      "table": "film_category"
+    },
+    {
+      "columns": [
+        "film_id"
+      ],
+      "tableTo": "film",
+      "columnsTo": [
+        "film_id"
+      ],
+      "onUpdate": "CASCADE",
+      "onDelete": "RESTRICT",
+      "nameExplicit": false,
+      "name": "inventory_film_id_film_film_id_fkey",
+      "entityType": "fks",
+      "table": "inventory"
+    },
+    {
+      "columns": [
+        "store_id"
+      ],
+      "tableTo": "store",
+      "columnsTo": [
+        "store_id"
+      ],
+      "onUpdate": "CASCADE",
+      "onDelete": "RESTRICT",
+      "nameExplicit": false,
+      "name": "inventory_store_id_store_store_id_fkey",
+      "entityType": "fks",
+      "table": "inventory"
+    },
+    {
+      "columns": [
+        "customer_id"
+      ],
+      "tableTo": "customer",
+      "columnsTo": [
+        "customer_id"
+      ],
+      "onUpdate": "CASCADE",
+      "onDelete": "RESTRICT",
+      "nameExplicit": false,
+      "name": "payment_customer_id_customer_customer_id_fkey",
+      "entityType": "fks",
+      "table": "payment"
+    },
+    {
+      "columns": [
+        "staff_id"
+      ],
+      "tableTo": "staff",
+      "columnsTo": [
+        "staff_id"
+      ],
+      "onUpdate": "CASCADE",
+      "onDelete": "RESTRICT",
+      "nameExplicit": false,
+      "name": "payment_staff_id_staff_staff_id_fkey",
+      "entityType": "fks",
+      "table": "payment"
+    },
+    {
+      "columns": [
+        "rental_id"
+      ],
+      "tableTo": "rental",
+      "columnsTo": [
+        "rental_id"
+      ],
+      "onUpdate": "CASCADE",
+      "onDelete": "SET NULL",
+      "nameExplicit": false,
+      "name": "payment_rental_id_rental_rental_id_fkey",
+      "entityType": "fks",
+      "table": "payment"
+    },
+    {
+      "columns": [
+        "inventory_id"
+      ],
+      "tableTo": "inventory",
+      "columnsTo": [
+        "inventory_id"
+      ],
+      "onUpdate": "CASCADE",
+      "onDelete": "RESTRICT",
+      "nameExplicit": false,
+      "name": "rental_inventory_id_inventory_inventory_id_fkey",
+      "entityType": "fks",
+      "table": "rental"
+    },
+    {
+      "columns": [
+        "customer_id"
+      ],
+      "tableTo": "customer",
+      "columnsTo": [
+        "customer_id"
+      ],
+      "onUpdate": "CASCADE",
+      "onDelete": "RESTRICT",
+      "nameExplicit": false,
+      "name": "rental_customer_id_customer_customer_id_fkey",
+      "entityType": "fks",
+      "table": "rental"
+    },
+    {
+      "columns": [
+        "staff_id"
+      ],
+      "tableTo": "staff",
+      "columnsTo": [
+        "staff_id"
+      ],
+      "onUpdate": "CASCADE",
+      "onDelete": "RESTRICT",
+      "nameExplicit": false,
+      "name": "rental_staff_id_staff_staff_id_fkey",
+      "entityType": "fks",
+      "table": "rental"
+    },
+    {
+      "columns": [
+        "address_id"
+      ],
+      "tableTo": "address",
+      "columnsTo": [
+        "address_id"
+      ],
+      "onUpdate": "CASCADE",
+      "onDelete": "RESTRICT",
+      "nameExplicit": false,
+      "name": "staff_address_id_address_address_id_fkey",
+      "entityType": "fks",
+      "table": "staff"
+    },
+    {
+      "columns": [
+        "store_id"
+      ],
+      "tableTo": "store",
+      "columnsTo": [
+        "store_id"
+      ],
+      "onUpdate": "CASCADE",
+      "onDelete": "RESTRICT",
+      "nameExplicit": false,
+      "name": "staff_store_id_store_store_id_fkey",
+      "entityType": "fks",
+      "table": "staff"
+    },
+    {
+      "columns": [
+        "manager_staff_id"
+      ],
+      "tableTo": "staff",
+      "columnsTo": [
+        "staff_id"
+      ],
+      "onUpdate": "CASCADE",
+      "onDelete": "RESTRICT",
+      "nameExplicit": false,
+      "name": "store_manager_staff_id_staff_staff_id_fkey",
+      "entityType": "fks",
+      "table": "store"
+    },
+    {
+      "columns": [
+        "address_id"
+      ],
+      "tableTo": "address",
+      "columnsTo": [
+        "address_id"
+      ],
+      "onUpdate": "CASCADE",
+      "onDelete": "RESTRICT",
+      "nameExplicit": false,
+      "name": "store_address_id_address_address_id_fkey",
+      "entityType": "fks",
+      "table": "store"
+    },
+    {
+      "definition": "select `a`.`actor_id` AS `actor_id`,`a`.`first_name` AS `first_name`,`a`.`last_name` AS `last_name`,group_concat(distinct concat(`c`.`name`,': ',(select group_concat(`f`.`title` order by `f`.`title` ASC separator ', ') from ((`sakila`.`film` `f` join `sakila`.`film_category` `fc` on((`f`.`film_id` = `fc`.`film_id`))) join `sakila`.`film_actor` `fa` on((`f`.`film_id` = `fa`.`film_id`))) where ((`fc`.`category_id` = `c`.`category_id`) and (`fa`.`actor_id` = `a`.`actor_id`)))) order by `c`.`name` ASC separator '; ') AS `film_info` from (((`sakila`.`actor` `a` left join `sakila`.`film_actor` `fa` on((`a`.`actor_id` = `fa`.`actor_id`))) left join `sakila`.`film_category` `fc` on((`fa`.`film_id` = `fc`.`film_id`))) left join `sakila`.`category` `c` on((`fc`.`category_id` = `c`.`category_id`))) group by `a`.`actor_id`,`a`.`first_name`,`a`.`last_name`",
+      "algorithm": "undefined",
+      "sqlSecurity": "invoker",
+      "withCheckOption": null,
+      "name": "actor_info",
+      "entityType": "views"
+    },
+    {
+      "definition": "select `cu`.`customer_id` AS `ID`,concat(`cu`.`first_name`,' ',`cu`.`last_name`) AS `name`,`a`.`address` AS `address`,`a`.`postal_code` AS `zip code`,`a`.`phone` AS `phone`,`sakila`.`city`.`city` AS `city`,`sakila`.`country`.`country` AS `country`,if(`cu`.`active`,'active','') AS `notes`,`cu`.`store_id` AS `SID` from (((`sakila`.`customer` `cu` join `sakila`.`address` `a` on((`cu`.`address_id` = `a`.`address_id`))) join `sakila`.`city` on((`a`.`city_id` = `sakila`.`city`.`city_id`))) join `sakila`.`country` on((`sakila`.`city`.`country_id` = `sakila`.`country`.`country_id`)))",
+      "algorithm": "undefined",
+      "sqlSecurity": "definer",
+      "withCheckOption": null,
+      "name": "customer_list",
+      "entityType": "views"
+    },
+    {
+      "definition": "select `sakila`.`film`.`film_id` AS `FID`,`sakila`.`film`.`title` AS `title`,`sakila`.`film`.`description` AS `description`,`sakila`.`category`.`name` AS `category`,`sakila`.`film`.`rental_rate` AS `price`,`sakila`.`film`.`length` AS `length`,`sakila`.`film`.`rating` AS `rating`,group_concat(concat(`sakila`.`actor`.`first_name`,' ',`sakila`.`actor`.`last_name`) separator ', ') AS `actors` from ((((`sakila`.`film` left join `sakila`.`film_category` on((`sakila`.`film_category`.`film_id` = `sakila`.`film`.`film_id`))) left join `sakila`.`category` on((`sakila`.`category`.`category_id` = `sakila`.`film_category`.`category_id`))) left join `sakila`.`film_actor` on((`sakila`.`film`.`film_id` = `sakila`.`film_actor`.`film_id`))) left join `sakila`.`actor` on((`sakila`.`film_actor`.`actor_id` = `sakila`.`actor`.`actor_id`))) group by `sakila`.`film`.`film_id`,`sakila`.`category`.`name`",
+      "algorithm": "undefined",
+      "sqlSecurity": "definer",
+      "withCheckOption": null,
+      "name": "film_list",
+      "entityType": "views"
+    },
+    {
+      "definition": "select `sakila`.`film`.`film_id` AS `FID`,`sakila`.`film`.`title` AS `title`,`sakila`.`film`.`description` AS `description`,`sakila`.`category`.`name` AS `category`,`sakila`.`film`.`rental_rate` AS `price`,`sakila`.`film`.`length` AS `length`,`sakila`.`film`.`rating` AS `rating`,group_concat(concat(concat(upper(substr(`sakila`.`actor`.`first_name`,1,1)),lower(substr(`sakila`.`actor`.`first_name`,2,length(`sakila`.`actor`.`first_name`))),' ',concat(upper(substr(`sakila`.`actor`.`last_name`,1,1)),lower(substr(`sakila`.`actor`.`last_name`,2,length(`sakila`.`actor`.`last_name`)))))) separator ', ') AS `actors` from ((((`sakila`.`film` left join `sakila`.`film_category` on((`sakila`.`film_category`.`film_id` = `sakila`.`film`.`film_id`))) left join `sakila`.`category` on((`sakila`.`category`.`category_id` = `sakila`.`film_category`.`category_id`))) left join `sakila`.`film_actor` on((`sakila`.`film`.`film_id` = `sakila`.`film_actor`.`film_id`))) left join `sakila`.`actor` on((`sakila`.`film_actor`.`actor_id` = `sakila`.`actor`.`actor_id`))) group by `sakila`.`film`.`film_id`,`sakila`.`category`.`name`",
+      "algorithm": "undefined",
+      "sqlSecurity": "definer",
+      "withCheckOption": null,
+      "name": "nicer_but_slower_film_list",
+      "entityType": "views"
+    },
+    {
+      "definition": "select `c`.`name` AS `category`,sum(`p`.`amount`) AS `total_sales` from (((((`sakila`.`payment` `p` join `sakila`.`rental` `r` on((`p`.`rental_id` = `r`.`rental_id`))) join `sakila`.`inventory` `i` on((`r`.`inventory_id` = `i`.`inventory_id`))) join `sakila`.`film` `f` on((`i`.`film_id` = `f`.`film_id`))) join `sakila`.`film_category` `fc` on((`f`.`film_id` = `fc`.`film_id`))) join `sakila`.`category` `c` on((`fc`.`category_id` = `c`.`category_id`))) group by `c`.`name` order by `total_sales` desc",
+      "algorithm": "undefined",
+      "sqlSecurity": "definer",
+      "withCheckOption": null,
+      "name": "sales_by_film_category",
+      "entityType": "views"
+    },
+    {
+      "definition": "select concat(`c`.`city`,',',`cy`.`country`) AS `store`,concat(`m`.`first_name`,' ',`m`.`last_name`) AS `manager`,sum(`p`.`amount`) AS `total_sales` from (((((((`sakila`.`payment` `p` join `sakila`.`rental` `r` on((`p`.`rental_id` = `r`.`rental_id`))) join `sakila`.`inventory` `i` on((`r`.`inventory_id` = `i`.`inventory_id`))) join `sakila`.`store` `s` on((`i`.`store_id` = `s`.`store_id`))) join `sakila`.`address` `a` on((`s`.`address_id` = `a`.`address_id`))) join `sakila`.`city` `c` on((`a`.`city_id` = `c`.`city_id`))) join `sakila`.`country` `cy` on((`c`.`country_id` = `cy`.`country_id`))) join `sakila`.`staff` `m` on((`s`.`manager_staff_id` = `m`.`staff_id`))) group by `s`.`store_id` order by `cy`.`country`,`c`.`city`",
+      "algorithm": "undefined",
+      "sqlSecurity": "definer",
+      "withCheckOption": null,
+      "name": "sales_by_store",
+      "entityType": "views"
+    },
+    {
+      "definition": "select `s`.`staff_id` AS `ID`,concat(`s`.`first_name`,' ',`s`.`last_name`) AS `name`,`a`.`address` AS `address`,`a`.`postal_code` AS `zip code`,`a`.`phone` AS `phone`,`sakila`.`city`.`city` AS `city`,`sakila`.`country`.`country` AS `country`,`s`.`store_id` AS `SID` from (((`sakila`.`staff` `s` join `sakila`.`address` `a` on((`s`.`address_id` = `a`.`address_id`))) join `sakila`.`city` on((`a`.`city_id` = `sakila`.`city`.`city_id`))) join `sakila`.`country` on((`sakila`.`city`.`country_id` = `sakila`.`country`.`country_id`)))",
+      "algorithm": "undefined",
+      "sqlSecurity": "definer",
+      "withCheckOption": null,
+      "name": "staff_list",
+      "entityType": "views"
+    }
+  ],
+  "renames": []
+}
