@@ -1,3 +1,6 @@
+import { useTranslations } from "next-intl";
+
 export default function DashboardPage() {
-  return <div>ダッシュボード</div>;
+  const t = useTranslations();
+  return <div>ダッシュボード: {t("meta.title")}</div>;
 }

@@ -6,6 +6,7 @@ import {
   Playfair_Display,
 } from "next/font/google";
 import "./globals.css";
+import { NextIntlClientProvider } from "next-intl";
 import { cn } from "@/lib/utils";
 
 const playfairDisplayHeading = Playfair_Display({
@@ -44,7 +45,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         playfairDisplayHeading.variable,
       )}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <NextIntlClientProvider>{children}</NextIntlClientProvider>
+      </body>
     </html>
   );
 }
