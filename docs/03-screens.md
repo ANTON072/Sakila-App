@@ -286,7 +286,7 @@ flowchart LR
 
 1. Server Component のまま実装できる（`searchParams` を受け取るだけ）
 2. ブラウザバック・リロード・URL共有が自然に動く
-3. クライアント側の状態管理が不要になり、React Hook Form は入力フォームだけに使える
+3. 一覧条件のためのクライアント状態が不要になり、入力フォームは Conform と Server Action に集中できる
 
 一覧画面のフィルタを `useState` で持つと Client Component 化が連鎖するため、
 最初から URL に寄せておくほうが構成が崩れにくい。

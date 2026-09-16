@@ -118,7 +118,7 @@ Vitest は `.env.local` を読み込まない。そのため、Auth.js を impor
 pnpm install
 pnpm add drizzle-orm mysql2 drizzle-zod zod
 pnpm add next-auth@beta bcryptjs
-pnpm add react-hook-form @hookform/resolvers
+pnpm add @conform-to/react @conform-to/zod
 pnpm add -D drizzle-kit vitest @next/env
 ```
 

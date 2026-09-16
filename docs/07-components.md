@@ -7,7 +7,7 @@ App Router では**既定が Server Component**。`'use client'` を付けたと
 
 | Server Component のまま | Client Component にする |
 |---|---|
-| データ取得を伴う画面・一覧・詳細 | フォーム（React Hook Form） |
+| データ取得を伴う画面・一覧・詳細 | Conform の `useForm` を使うフォームの葉 |
 | テーブル、カード、バッジなどの表示 | 開閉するダイアログ・ドロップダウン |
 | ページネーションのリンク | 入力に即応する検索ボックス |
 | レイアウト、ナビゲーション | グラフ（描画ライブラリがDOM APIを使う） |
@@ -79,7 +79,6 @@ src/components/
 |---|---|
 | `button` | 全般 |
 | `input` / `label` | フォーム |
-| `form` | React Hook Form との連携 |
 | `table` | 一覧表示 |
 | `card` | ダッシュボードの指標、詳細のセクション |
 | `badge` | カテゴリ、レーティング、在庫状態 |
@@ -152,47 +151,115 @@ sakila の金額に通貨単位の定義はないが、データが米国の店�
 
 ## フォームの実装パターン
 
-フォームは3画面（ログイン、顧客登録、顧客編集）+ レンタル受付。
-React Hook Form + Zod + Server Action を組み合わせる。
+フォームはログイン、パスワード変更、顧客・スタッフの登録編集、レンタル受付に使う。
+**Conform + Zod + Server Action** を組み合わせ、HTML の `<form>` と `FormData` を
+データの境界にする。ページと初期データ取得は Server Component のまま保ち、
+`useForm` と `useActionState` が必要なフォーム本体だけを小さな Client Component にする。
 
 ```mermaid
 flowchart LR
-    A[React Hook Form] -->|zodResolver| B[クライアント検証]
-    B --> C[Server Action 呼び出し]
-    C -->|Zod で再検証| D[DB 更新]
-    C -->|fieldErrors| E[フォームにエラー表示]
+    A[HTML form] -->|FormData| B[Server Action]
+    B -->|parseWithZod| C{検証}
+    C -->|success| D[DB 更新]
+    C -->|SubmissionResult| E[useActionState]
+    E -->|lastResult| F[Conform がフィールドエラーを表示]
 ```
 
-### 検証を2回行う理由
+### Server Action を正とする
 
-クライアント側の検証は**利便性のため**（即座にフィードバックできる）。
-サーバー側の検証は**正当性のため**（クライアントは信用できない）。
+検証の正本は Server Action に置く。Action は `FormData` を直接受け取り、
+`parseWithZod` で検証する。JavaScript が読み込まれる前でもネイティブフォームとして
+送信でき、Action が返した `SubmissionResult` を Conform が同じフィールドへ戻す。
 
-Zod スキーマを共有すれば、定義は1つで済む。
-`features/<name>/schema.ts` に置き、フォームと Action の両方から import する。
+Zod スキーマは `features/<name>/schema.ts` に置く。まずサーバー検証だけで実装し、
+入力中の即時検証が本当に必要なフォームだけ、同じスキーマを Client Component の
+`onValidate` からも使う。クライアント検証を加えても、Action 側の再検証は省略しない。
 
-### Server Action の結果をフォームに戻す
+```ts
+// features/customers/actions.ts
+'use server'
 
-[06-data-access.md](./06-data-access.md) の `ActionResult` 型を受け取り、
-`fieldErrors` を React Hook Form の `setError` に流す。
+import { parseWithZod } from '@conform-to/zod'
 
+export async function registerCustomer(
+  _previousState: unknown,
+  formData: FormData,
+) {
+  await requireSession()
+
+  const submission = parseWithZod(formData, { schema: customerSchema })
+  if (submission.status !== 'success') {
+    return submission.reply()
+  }
+
+  await db.transaction((tx) => registerCustomerCore(tx, submission.value))
+  revalidatePath('/customers')
+  redirect('/customers')
+}
 ```
-result.ok === false
-  → fieldErrors の各キーを setError(key, { message })
-  → 全体エラーは <Alert> で表示
+
+認証・認可は検証より先に行う。`FormData` の hidden 値も信用せず、`staffId` や
+`storeId` はセッションと DB から決める。
+
+### Action の結果をフォームに戻す
+
+フォーム本体では React 19 の `useActionState` と Conform の `useForm` を接続する。
+`lastResult` を渡すだけで、Action のフィールドエラーとフォーム全体エラーを
+Conform のメタデータから描画できる。フィールドごとのエラーを手作業で変換しない。
+
+```tsx
+'use client'
+
+import { getFormProps, getInputProps, useForm } from '@conform-to/react'
+import { useActionState } from 'react'
+
+export function CustomerForm() {
+  const [lastResult, action, pending] = useActionState(registerCustomer, undefined)
+  const [form, fields] = useForm({
+    lastResult,
+  })
+
+  return (
+    <form {...getFormProps(form)} action={action}>
+      <Label htmlFor={fields.firstName.id}>名</Label>
+      <Input {...getInputProps(fields.firstName, { type: 'text' })} />
+      <p id={fields.firstName.errorId}>{fields.firstName.errors}</p>
+
+      <p id={form.errorId}>{form.errors}</p>
+      <Button type="submit" disabled={pending}>登録</Button>
+    </form>
+  )
+}
 ```
 
-`useActionState`（React 19）を使う方法もあるが、
-React Hook Form と併用すると状態が二重になる。
-**どちらか一方に寄せる**のが混乱を避けるコツで、
-クライアント検証が欲しいなら React Hook Form 側に統一する。
+入力値は Conform の内部状態へコピーせず、名前付きのネイティブ input に保持する。
+初期値は `useForm({ defaultValue })` に渡す。サーバーから渡す初期データは
+シリアライズ可能な値に絞り、`Date` や `DECIMAL` は文字列へ変換してから渡す。
+
+この基本形では送信時にサーバーで検証する。入力中にも検証したい場合だけ、
+`useForm` の `onValidate` で同じスキーマを `parseWithZod` に渡し、
+`shouldValidate: 'onBlur'` と `shouldRevalidate: 'onInput'` を追加する。
+
+### shadcn/ui との接続
+
+特定のフォームライブラリを前提にした shadcn/ui `Form` ラッパーは使わない。
+`Input`、`Label`、`Select`、`Button` などの見た目の部品へ、Conform の
+`getInputProps` / `getSelectProps` と `id`、`aria-describedby` を渡す。
+共通化する場合も Conform の field metadata を受け取る薄い `FormField` に留め、
+スキーマや送信処理を UI コンポーネントへ隠さない。
 
 ### 送信中の状態
 
-`useFormStatus` または React Hook Form の `formState.isSubmitting` で
-ボタンを無効化する。レンタル受付の二重送信は
+`useActionState` の `pending`、または form の内側に分離した送信ボタンで
+`useFormStatus` の `pending` を使い、ボタンを無効化する。レンタル受付の二重送信は
 [06-data-access.md](./06-data-access.md) のとおり DB 側でも防ぐが、
 UI でも止めておく。
+
+### JavaScript なしでも成立させる
+
+Conform は progressive enhancement を前提にする。成功時の `redirect`、サーバー検証、
+DB 更新はすべて Action 内で完結させる。ダイアログ、検索候補、入力中の再検証は
+JavaScript があるときの改善であり、送信そのものの前提にはしない。
 
 ## ローディングとエラー
 

@@ -9,7 +9,7 @@
 | 置き場所 | `features/<name>/queries.ts` | `features/<name>/actions.ts` |
 | 呼び出し元 | Server Component から直接 `await` | フォーム送信 / ボタン |
 | `'use server'` | 付けない | ファイル先頭に付ける |
-| 戻り値 | データそのもの | 成功/失敗の結果オブジェクト |
+| 戻り値 | データそのもの | フォームは Conform の `SubmissionResult`、成功時は原則 `redirect` |
 | 認証確認 | layout で担保済み | **各関数で必須** |
 
 参照系に `'use server'` を付けないのが重要。
@@ -172,17 +172,34 @@ Action なので店長権限を要求しない。
 
 ## Server Action の型
 
-戻り値の形を全 Action で統一しておくと、フォーム側の扱いが揃う。
+フォームから呼ぶ Action は `(previousState, formData)` の形に揃え、React 19 の
+`useActionState` へ直接渡す。検証エラーは独自の成功/失敗型に詰め替えず、
+Conform の `submission.reply()` が返す `SubmissionResult` をそのまま返す。
 
 ```ts
-type ActionResult<T = void> =
-  | { ok: true; data: T }
-  | { ok: false; error: string; fieldErrors?: Record<string, string[]> }
+import type { SubmissionResult } from '@conform-to/react'
+
+type FormAction = (
+  previousState: unknown,
+  formData: FormData,
+) => Promise<SubmissionResult | undefined>
 ```
 
-例外を投げるのではなく結果オブジェクトを返す理由は、
-バリデーションエラーをフィールド単位でフォームに戻すため。
-`fieldErrors` は Zod の `flatten().fieldErrors` をそのまま入れられる形にしておく。
+`parseWithZod` の結果には入力値、フィールドエラー、フォーム全体エラー、
+再送信に必要なメタデータが含まれる。フォーム側はこれを `useForm({ lastResult })` に
+渡せばよく、Zod エラーから独自形式への変換は不要になる。
+
+競合や業務ルール違反のような予期した失敗も `submission.reply()` で返す。
+
+```ts
+return submission.reply({
+  formErrors: ['選択した作品は直前に貸し出されました。別の作品を選んでください。'],
+})
+```
+
+成功後に別画面へ進むフォームは `redirect()` する。同じ画面に留まるフォームだけ、
+成功メッセージを含む Action state を別途定義する。フォームを使わない単純な操作は
+無理に `SubmissionResult` へ合わせず、`void` または操作専用の最小限の型を使う。
 
 想定外のエラー（DB接続断など）は例外のままにして、
 Next.js の `error.tsx` に任せる。**予期したエラーは戻り値、予期しないエラーは例外**。
@@ -195,25 +212,42 @@ Next.js の `error.tsx` に任せる。**予期したエラーは戻り値、予
 // rentals/actions.ts
 'use server'
 
-export async function createRental(input: unknown): Promise<ActionResult<{ rentalId: number }>> {
+import { parseWithZod } from '@conform-to/zod'
+import { revalidatePath } from 'next/cache'
+import { redirect } from 'next/navigation'
+
+export async function createRental(_previousState: unknown, formData: FormData) {
   // 1. 認証
   const session = await requireSession()
 
   // 2. 検証
-  const parsed = createRentalSchema.safeParse(input)
-  if (!parsed.success) {
-    return { ok: false, error: '入力内容を確認してください', fieldErrors: parsed.error.flatten().fieldErrors }
+  const submission = parseWithZod(formData, { schema: createRentalSchema })
+  if (submission.status !== 'success') {
+    return submission.reply()
   }
 
   // 3. 実行（トランザクション境界だけここで張り、中身は core に委譲）
-  const rentalId = await db.transaction((tx) =>
-    performRental(tx, parsed.data, session.user.staffId),
-  )
+  let rentalId: number
+  try {
+    rentalId = await db.transaction((tx) =>
+      performRental(tx, submission.value, session.user.staffId),
+    )
+  } catch (error) {
+    if (error instanceof InventoryUnavailableError) {
+      return submission.reply({
+        formErrors: ['選択した作品に貸出可能な在庫がありません。'],
+      })
+    }
+    throw error
+  }
 
   // 4. キャッシュ無効化
-  revalidatePath(`/customers/${parsed.data.customerId}`)
+  revalidatePath(`/customers/${submission.value.customerId}`)
+  revalidatePath('/rentals')
+  revalidatePath('/inventory')
 
-  return { ok: true, data: { rentalId } }
+  // 5. 成功時の遷移。redirect は例外を投げるため最後に呼ぶ
+  redirect(`/customers/${submission.value.customerId}?rentalId=${rentalId}`)
 }
 ```
 
@@ -243,9 +277,9 @@ Action は「認証・検証・トランザクション境界・キャッシュ�
 
 ### 2. 検証
 
-引数の型を `unknown` にして、必ず Zod を通してから使う。
-`input: CreateRentalInput` のように型を付けると、
-実行時には検証されないまま通ってしまう（TypeScript の型は実行時に存在しない）。
+Action が受け取る `FormData` は信頼せず、必ず `parseWithZod` を通してから使う。
+`submission.status === 'success'` の分岐後だけ `submission.value` を core 関数へ渡す。
+TypeScript の型注釈だけでは実行時検証にならない。
 
 ### 4. キャッシュ無効化
 

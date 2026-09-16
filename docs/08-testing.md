@@ -22,7 +22,7 @@ jsdom も Testing Library も不要で、すべて Node 環境で完結する。
 | 純粋関数（延滞料金計算など） | ○ | 同上 |
 | Server Component | × | データ取得は Query 側でテスト済み。描画は目視 |
 | shadcn/ui の部品 | × | 自作していない |
-| フォームの入力挙動 | × | React Hook Form の責務 |
+| フォームの DOM・状態管理 | × | Conform の責務。自作 Zod スキーマは層1でテストする |
 | Auth.js の内部動作 | × | ライブラリの責務。`authorize` の中身だけ切り出してテスト |
 
 ## テストの3層
@@ -162,17 +162,19 @@ actions.ts        'use server' — 認証・Zod検証・トランザクション
 ```ts
 // rentals/actions.ts
 'use server'
-export async function createRental(input: unknown): Promise<ActionResult<{ rentalId: number }>> {
+export async function createRental(_previousState: unknown, formData: FormData) {
   const session = await requireSession()
-  const parsed = createRentalSchema.safeParse(input)
-  if (!parsed.success) { /* ... */ }
+  const submission = parseWithZod(formData, { schema: createRentalSchema })
+  if (submission.status !== 'success') {
+    return submission.reply()
+  }
 
   const rentalId = await db.transaction((tx) =>
-    performRental(tx, parsed.data, session.user.staffId)
+    performRental(tx, submission.value, session.user.staffId)
   )
 
-  revalidatePath(`/customers/${parsed.data.customerId}`)
-  return { ok: true, data: { rentalId } }
+  revalidatePath(`/customers/${submission.value.customerId}`)
+  redirect(`/customers/${submission.value.customerId}?rentalId=${rentalId}`)
 }
 
 // rentals/core.ts  ← テスト対象

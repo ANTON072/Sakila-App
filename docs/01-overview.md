@@ -25,7 +25,7 @@ SQL の学習内容（書籍「初めてのSQL」）を、実際に動くアプ�
 | ORM | Drizzle ORM | SQL に近い記述。学んだ SQL の知識がそのまま活きる |
 | スキーマ→検証 | drizzle-zod | Drizzle スキーマから Zod スキーマを生成し二重管理を避ける |
 | バリデーション | Zod | Server Actions の入力検証 |
-| フォーム | React Hook Form | フォーム状態管理 |
+| フォーム | Conform | HTML フォームと Server Actions を中心に、検証結果とアクセシビリティ属性を型安全に接続する |
 | UI | shadcn/ui | コンポーネントをコードとして手元に持てる |
 | Lint / Format | Biome | ESLint + Prettier を1つに集約 |
 | 認証 | Auth.js v5（Credentials） | `staff` テーブルをそのままログインユーザーにできる |
@@ -124,7 +124,7 @@ rental / payment の期間: 2005-05-24 〜 2006-02-14
 | 04 | [機能一覧](./04-features.md) | 各機能の仕様と使用テーブル |
 | 05 | [認証設計](./05-auth.md) | Auth.js + staff テーブル |
 | 06 | [データアクセス設計](./06-data-access.md) | Server Actions / Query 一覧 |
-| 07 | [コンポーネント設計](./07-components.md) | UI の構成方針 |
+| 07 | [コンポーネント設計](./07-components.md) | UI の構成方針と Conform のフォーム設計 |
 | 08 | [テスト設計](./08-testing.md) | Vitest・実DB接続・ロールバック |
 
 ## 進め方の目安

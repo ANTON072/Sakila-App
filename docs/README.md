@@ -17,14 +17,14 @@
 | 04 | [機能一覧](./04-features.md) | 17機能の仕様、使用テーブル、SQLの要点 |
 | 05 | [認証設計](./05-auth.md) | Auth.js + `staff` テーブル、bcrypt 移行 |
 | 06 | [データアクセス設計](./06-data-access.md) | Query / Server Action、トランザクション |
-| 07 | [コンポーネント設計](./07-components.md) | Server/Client の切り分け、共通部品 |
+| 07 | [コンポーネント設計](./07-components.md) | Server/Client の切り分け、Conform、共通部品 |
 | 08 | [テスト設計](./08-testing.md) | Vitest、実DB接続、トランザクションロールバック |
 | 09 | [開発環境セットアップ](./09-dev-setup.md) | Volta、docker compose、環境変数 |
 
 ## 技術スタック
 
 Next.js（App Router）/ TypeScript / Drizzle ORM / drizzle-zod / Zod /
-React Hook Form / shadcn/ui / Biome / Auth.js v5 / MySQL 8.0 / Vitest
+Conform / shadcn/ui / Biome / Auth.js v5 / MySQL 8.0 / Vitest
 
 選定理由と不採用にしたもの（Hono、Better Auth、Cognito）は
 [01-overview.md](./01-overview.md) に記載。
