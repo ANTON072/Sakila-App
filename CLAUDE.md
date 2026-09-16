@@ -31,23 +31,26 @@ Next.js 16（App Router）+ TypeScript + Drizzle ORM + MySQL 8.0（Docker）。
 ```
 src/
 ├── app/
-│   ├── (auth)/login/          # 未認証でアクセス可
-│   └── (dashboard)/           # layout.tsx でセッション必須化
-│       ├── films/ customers/ rentals/ inventory/ reports/ staff/
+│   ├── login/                 # 未認証でアクセス可
+│   └── (protected)/           # layout.tsx でセッション必須化
+│       ├── films/ customers/ rentals/ inventory/ reports/
+│       ├── (admin)/           # スーパーユーザー権限が必要
+│       │   ├── staff/
+│       │   └── layout.tsx     # ← ここでスーパーユーザー権限を確認
 │       └── layout.tsx         # ← ここで認証チェック
-├── components/
-│   ├── ui/                    # shadcn/ui 生成物（直接編集してよいが再生成で上書きされる）
-│   ├── layout/                # ヘッダー・サイドバー
-│   ├── shared/                # 機能横断の再利用部品
-│   └── features/              # 機能固有のコンポーネント
+├── common/
+│   └── components/
+│       ├── ui/                # shadcn/ui 生成物（直接編集してよいが再生成で上書きされる）
+│       └── <shared>.tsx       # ドメインを問わず使う共通 UI
 ├── db/
 │   ├── schema/                # Drizzle スキーマ（テーブルごとに分割）
 │   └── index.ts               # db インスタンス・Executor 型
 ├── features/
 │   └── <name>/
+│       ├── components/        # このドメイン専用の UI
 │       ├── queries.ts         # 参照系（'use server' なし）
 │       ├── actions.ts         # 'use server'。認証・検証・Tx境界のみ
-│       ├── core.ts            # 業務ロジック（テスト対象。'use server' なし）
+│       ├── service.ts         # 業務処理（テスト対象。'use server' なし）
 │       └── schema.ts          # Zod スキーマ
 └── lib/
     ├── auth.ts                # Auth.js 設定
@@ -68,7 +71,7 @@ export async function locateFilms(params: FilmSearchParams, executor: Executor =
 }
 ```
 
-**更新系（actions.ts → core.ts）** — Action は「認証・Conform/Zod 検証・トランザクション境界・revalidatePath・redirect」のみ担い、業務ロジックは `core.ts` に委譲する。
+**更新系（actions.ts → service.ts）** — Action は「認証・Conform/Zod 検証・トランザクション境界・revalidatePath・redirect」のみ担い、業務処理は `service.ts` に委譲する。
 
 ```ts
 // actions.ts
@@ -91,7 +94,8 @@ export async function createRental(_previousState: unknown, formData: FormData) 
 ### 認証
 
 - Auth.js v5、JWT セッション戦略
-- `(dashboard)/layout.tsx` でセッション確認 → 未認証は `/login` へリダイレクト
+- `(protected)/layout.tsx` でセッション確認 → 未認証は `/login` へリダイレクト
+- `(protected)/(admin)/layout.tsx` でスーパーユーザー権限を確認
 - **Server Action は独立したエンドポイントになるため、各 Action 冒頭でも必ず `requireSession()` を呼ぶ**
 - スタッフ管理 Action はさらに `requireStoreManager()` で店長権限を DB 照合（JWT 内の値だけでは判定しない）
 - `staffId` はフォームの hidden input から取らず、セッションから取る
@@ -104,7 +108,7 @@ DB モックは使わない。テスト3層：
 | --- | --- | --- | --- |
 | 1 | Zod スキーマ・純粋関数 | 不要 | 不要 |
 | 2 | Query 関数（参照のみ） | 必要 | 不要（sakila の固定データを使う） |
-| 3 | core 関数（更新系） | 必要 | トランザクション + ロールバック |
+| 3 | service 関数（更新系） | 必要 | トランザクション + ロールバック |
 
 更新系テストは `db.transaction` で囲み、検証も同一トランザクション（`tx`）経由で行い、最後に `throw new RollbackError()` でロールバックする。
 

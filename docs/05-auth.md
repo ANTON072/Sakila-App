@@ -212,17 +212,20 @@ sequenceDiagram
 
 ```
 src/app/
-├── (auth)/
-│   └── login/page.tsx        # 未認証でアクセス可
-└── (dashboard)/
+├── login/page.tsx            # 未認証でアクセス可
+└── (protected)/
     ├── layout.tsx            # ← ここでセッション検証
     ├── page.tsx
     ├── films/
-    └── ...
+    ├── ...
+    └── (admin)/
+        ├── layout.tsx        # ← ここでスーパーユーザー権限を検証
+        └── staff/
 ```
 
-`(dashboard)/layout.tsx` でセッションを確認し、なければ `/login` へリダイレクトする。
-配下に画面を追加するたびに保護を書く必要がなくなる。
+`(protected)/layout.tsx` でセッションを確認し、なければ `/login` へリダイレクトする。
+`(protected)/(admin)/layout.tsx` はスーパーユーザー権限を確認する。配下に画面を追加するたびに
+保護を書く必要がなくなる。
 
 ### middleware との使い分け
 
@@ -313,7 +316,7 @@ sakila の `staff` には役職や権限を表すカラムがない。
 | 3 | Auth.js の設定（`lib/auth.ts`）と型拡張 |
 | 4 | ログイン画面 |
 | 5 | 初回パスワード変更画面と強制リダイレクト |
-| 6 | `(dashboard)/layout.tsx` でのセッション検証 |
+| 6 | `(protected)/layout.tsx` でのセッション検証と `(protected)/(admin)/layout.tsx` でのスーパーユーザー認可 |
 | 7 | Server Action 用のセッション検証・店長認可ヘルパー |
 
 ここまで終えれば、以降の画面はすべて保護された状態で作り始められる。

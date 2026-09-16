@@ -2,19 +2,25 @@
 
 ## 基本方針
 
-**参照（Query）と更新（Server Action）を明確に分ける。**
+**参照（Query）、Next.js の更新境界（Server Action）、業務処理（service）を明確に分ける。**
 
-| | 参照 | 更新 |
-|---|---|---|
-| 置き場所 | `features/<name>/queries.ts` | `features/<name>/actions.ts` |
-| 呼び出し元 | Server Component から直接 `await` | フォーム送信 / ボタン |
-| `'use server'` | 付けない | ファイル先頭に付ける |
-| 戻り値 | データそのもの | フォームは Conform の `SubmissionResult`、成功時は原則 `redirect` |
-| 認証確認 | layout で担保済み | **各関数で必須** |
+| | Query | Server Action | service |
+|---|---|---|---|
+| 置き場所 | `features/<name>/queries.ts` | `features/<name>/actions.ts` | `features/<name>/service.ts` |
+| 役割 | 読み取り専用のデータアクセス | Next.js の更新境界 | Next.js 非依存の業務処理 |
+| 呼び出し元 | Server Component から直接 `await` | フォーム送信 / ボタン | Action が主。複雑な集計・判定では Query からも呼べる |
+| `'use server'` | 付けない | ファイル先頭に付ける | 付けない |
+| 戻り値 | データそのもの | フォームは Conform の `SubmissionResult`、成功時は原則 `redirect` | 業務処理の結果 |
+| 認証確認 | layout で担保済み | **各関数で必須** | 呼び出し元で確認済みの認証済み主体を引数で受け取る |
 
 参照系に `'use server'` を付けないのが重要。
 付けると外部から呼べるエンドポイントになり、認証チェックが必要になる。
 Server Component から直接呼ぶだけの関数は、ただの非同期関数でよい。
+
+`service.ts` は共通処理を雑多に置く場所ではない。たとえば在庫を確定して rental と
+payment を作成する、延滞料金を算出する、といった業務上の意味を持つ処理だけを置く。
+Action は認証・入力検証・トランザクション・キャッシュ無効化・リダイレクトに留め、
+業務処理を service へ委譲する。
 
 ## ディレクトリ構成
 
@@ -26,12 +32,12 @@ src/features/
 ├── customers/
 │   ├── queries.ts
 │   ├── actions.ts       # 'use server'。認証・検証・トランザクション境界
-│   ├── core.ts          # 実処理。テスト対象
+│   ├── service.ts       # 業務処理。テスト対象
 │   └── schema.ts
 ├── rentals/
 │   ├── queries.ts
 │   ├── actions.ts
-│   ├── core.ts
+│   ├── service.ts
 │   └── schema.ts
 └── reports/
     └── queries.ts
@@ -39,13 +45,13 @@ src/features/
 
 機能単位でまとめると、画面を1つ作るときに触るファイルが1ディレクトリに収まる。
 
-`actions.ts` と `core.ts` を分ける理由は [08-testing.md](./08-testing.md) を参照。
+`actions.ts` と `service.ts` を分ける理由は [08-testing.md](./08-testing.md) を参照。
 `'use server'` 付きのファイルは Vitest から直接扱いづらいため、
-業務ロジックを素の関数として `core.ts` に置く。
+業務処理を素の関数として `service.ts` に置く。
 
 ## DB ハンドルの受け取り方
 
-Query / core 関数は **DB ハンドルを引数で受け取る**。
+Query / service 関数は **DB ハンドルを引数で受け取る**。
 テスト時にトランザクションを注入してロールバックできるようにするため。
 
 ```ts
@@ -251,10 +257,10 @@ export async function createRental(_previousState: unknown, formData: FormData) 
 }
 ```
 
-業務ロジックは `core.ts` 側に置く。
+業務処理は `service.ts` 側に置く。
 
 ```ts
-// rentals/core.ts — 'use server' を付けない
+// rentals/service.ts — 'use server' を付けない
 export async function performRental(
   tx: Executor,
   input: CreateRentalInput,
@@ -265,7 +271,7 @@ export async function performRental(
 ```
 
 Action は「認証・検証・トランザクション境界・キャッシュ無効化」という
-定型処理だけを担い、`core.ts` がテスト対象になる。
+定型処理だけを担い、`service.ts` がテスト対象になる。
 
 ### 1. 認証
 

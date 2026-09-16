@@ -2,8 +2,9 @@
 
 ## ルーティング一覧
 
-App Router の Route Group を使い、認証前後を `(auth)` と `(dashboard)` で分ける。
-`(dashboard)/layout.tsx` でセッションを検証すれば、配下の全画面が一括で保護される。
+App Router の Route Group を使い、認証必須の画面を `(protected)` に置く。
+`(protected)/layout.tsx` でセッションを検証し、さらに `(protected)/(admin)/layout.tsx` で
+スーパーユーザー権限を検証する。
 
 | パス | 画面名 | 認証 | 主な使用テーブル |
 |---|---|---|---|
@@ -311,6 +312,6 @@ flowchart LR
 └──────────┴─────────────────────────────────┘
 ```
 
-ヘッダーとサイドナビは `(dashboard)/layout.tsx` に置き、全画面で共有する。
+ヘッダーとサイドナビは `(protected)/layout.tsx` に置き、全画面で共有する。
 ログイン中のスタッフ名と所属店舗をヘッダーに常時表示しておくと、
 「誰として操作しているか」が明確になり、`staff_id` の自動付与が理解しやすくなる。

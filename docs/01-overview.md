@@ -41,24 +41,22 @@ sakila-app/
 ├── docs/                       # 本ドキュメント群
 ├── src/
 │   ├── app/
-│   │   ├── (auth)/login/       # 認証前
-│   │   └── (dashboard)/        # 認証後（layout でセッション必須化）
-│   │       ├── films/
-│   │       ├── customers/
-│   │       ├── rentals/
-│   │       ├── inventory/
-│   │       └── reports/
-│   ├── components/
+│   │   ├── login/              # 未認証でアクセス可
+│   │   └── (protected)/        # 認証後（layout でセッション必須化）
+│   │       ├── films/ customers/ rentals/ inventory/ reports/
+│   │       └── (admin)/staff/  # スーパーユーザー権限が必要
+│   ├── common/components/
 │   │   ├── ui/                 # shadcn/ui 生成物
-│   │   └── features/           # 機能単位のコンポーネント
+│   │   └── <shared>.tsx        # ドメインを問わず使う共通 UI
 │   ├── db/
 │   │   ├── schema/             # Drizzle スキーマ（テーブルごとに分割）
 │   │   └── index.ts            # db インスタンス
 │   ├── features/               # 機能単位のサーバー処理
 │   │   └── <feature>/
+│   │       ├── components/     # このドメイン専用の UI
 │   │       ├── queries.ts      # 参照系
 │   │       ├── actions.ts      # 'use server'。認証・検証・Tx境界
-│   │       ├── core.ts         # 業務ロジック（テスト対象）
+│   │       ├── service.ts      # 業務処理（テスト対象）
 │   │       └── schema.ts       # Zod スキーマ
 │   └── lib/
 │       ├── auth.ts             # Auth.js 設定

@@ -231,7 +231,7 @@ pnpm check          # 検査と自動修正
 
 既に `.vscode/` があるので、保存時フォーマットの設定を追記する。
 shadcn/ui の生成コードは Biome の一部ルールに引っかかることがあるため、
-`src/components/ui/` を対象外にするか該当ルールを緩める。
+`src/common/components/ui/` を対象外にするか該当ルールを緩める。
 詳細は [07-components.md](./07-components.md) を参照。
 
 ## セットアップ完了の確認

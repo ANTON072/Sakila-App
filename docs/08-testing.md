@@ -17,7 +17,7 @@ jsdom も Testing Library も不要で、すべて Node 環境で完結する。
 | 対象 | テストする | 理由 |
 |---|---|---|
 | Query 関数 | ○ | JOIN の経路と集計の正しさが本体 |
-| Server Action のコアロジック | ○ | トランザクション、在庫判定、競合制御 |
+| Server Action が呼び出す service 関数 | ○ | トランザクション、在庫判定、競合制御 |
 | Zod スキーマ | ○ | 境界値。DB 不要で速い |
 | 純粋関数（延滞料金計算など） | ○ | 同上 |
 | Server Component | × | データ取得は Query 側でテスト済み。描画は目視 |
@@ -149,14 +149,14 @@ export async function locateFilms(params: FilmSearchParams, executor: Executor =
 呼び出し側（Server Component）は第2引数を省略するだけなので、
 本番コードの書き味は変わらない。
 
-### Server Action からコアロジックを分ける
+### Server Action から service 関数を分ける
 
 Server Action は `'use server'` が付き、認証・検証・トランザクション境界を担う。
 ここにビジネスロジックまで書くとテストしづらい。
 
 ```
 actions.ts        'use server' — 認証・Zod検証・トランザクション開始
-  └── core.ts     指示なし      — 実際の処理。Executor を受け取る
+  └── service.ts  指示なし      — 業務処理。Executor を受け取る
 ```
 
 ```ts
@@ -177,7 +177,7 @@ export async function createRental(_previousState: unknown, formData: FormData) 
   redirect(`/customers/${submission.value.customerId}?rentalId=${rentalId}`)
 }
 
-// rentals/core.ts  ← テスト対象
+// rentals/service.ts  ← テスト対象
 export async function performRental(
   tx: Executor,
   input: CreateRentalInput,
@@ -190,7 +190,7 @@ export async function performRental(
 この分離には副次的な利点もある。
 
 - `'use server'` ファイルを Vitest から直接 import すると、
-  Next.js のビルド時変換が効かず扱いが面倒になる。core 側は素の関数なので問題ない
+  Next.js のビルド時変換が効かず扱いが面倒になる。service 側は素の関数なので問題ない
 - `server-only` パッケージを import している場合も同様に回避できる
 - 認証・検証と業務ロジックが混ざらず、読みやすくなる
 
@@ -291,7 +291,7 @@ test('fetchFilmStock は貸出中を除いた在庫数を返す', async () => {
 固定データに依存した検証は、意図が伝わる範囲で使う。
 「`ACADEMY DINOSAUR` という作品が存在する」程度なら直書きしてよい。
 
-### 層3: Action コアロジック
+### 層3: Action が呼び出す service 関数
 
 トランザクションで囲んでロールバックする。
 
@@ -416,7 +416,7 @@ Playwright を入れればログイン〜レンタル受付の通しを検証で
 | 4 | 層1: Zod スキーマのテスト（DB不要で手応えが早い） |
 | 5 | `Executor` 型の導入と Query 関数への引数追加 |
 | 6 | 層2: Query テスト |
-| 7 | Action からコアロジックを分離 |
+| 7 | Action から service 関数を分離 |
 | 8 | 層3: トランザクションテスト |
 
 5と7は既存コードへの変更を伴うため、

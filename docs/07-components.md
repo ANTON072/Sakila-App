@@ -43,16 +43,15 @@ URL クエリパラメータに持たせる。
 ## コンポーネント階層
 
 ```
-src/components/
-├── ui/                    # shadcn/ui の生成物（直接編集しない）
-│   ├── button.tsx
-│   ├── table.tsx
-│   ├── dialog.tsx
-│   └── ...
-├── layout/
+src/
+├── common/components/
+│   ├── ui/                # shadcn/ui の生成物
+│   │   ├── button.tsx
+│   │   ├── table.tsx
+│   │   ├── dialog.tsx
+│   │   └── ...
 │   ├── app-header.tsx     # ログイン中スタッフ名、ログアウト
-│   └── app-sidebar.tsx    # ナビゲーション
-├── shared/                # 機能横断の再利用部品
+│   ├── app-sidebar.tsx    # ナビゲーション
 │   ├── data-table.tsx
 │   ├── pagination.tsx
 │   ├── search-box.tsx
@@ -60,18 +59,18 @@ src/components/
 │   ├── stat-card.tsx
 │   ├── money.tsx
 │   └── date-display.tsx
-└── features/              # 機能固有
-    ├── films/
+└── features/
+    ├── films/components/  # films ドメイン専用
     │   ├── film-table.tsx
     │   ├── film-filters.tsx
     │   └── film-stock-badge.tsx
-    ├── customers/
-    ├── rentals/
-    └── reports/
+    ├── customers/components/
+    ├── rentals/components/
+    └── reports/components/
 ```
 
-`ui/` は shadcn が生成したファイル。カスタマイズしたくなったら直接編集してよいが、
-再生成すると上書きされるため、独自の振る舞いは `shared/` 側に置く。
+`common/components/ui/` は shadcn が生成したファイル。カスタマイズしたくなったら直接編集してよいが、
+再生成すると上書きされるため、独自の振る舞いは `common/components/` 側に置く。
 
 ## 導入する shadcn/ui コンポーネント
 
@@ -266,7 +265,7 @@ JavaScript があるときの改善であり、送信そのものの前提には
 App Router の規約ファイルを使う。
 
 ```
-app/(dashboard)/films/
+app/(protected)/films/
 ├── page.tsx
 ├── loading.tsx     # Suspense フォールバック
 └── error.tsx       # エラー境界（'use client' 必須）
