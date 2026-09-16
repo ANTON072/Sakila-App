@@ -7,12 +7,10 @@ import {
   customType,
   datetime,
   decimal,
-  foreignKey,
   index,
   int,
   mediumint,
   mysqlEnum,
-  mysqlSchema,
   mysqlTable,
   mysqlView,
   primaryKey,
@@ -130,26 +128,58 @@ export const customer = mysqlTable(
   ],
 );
 
-export const film = mysqlTable("film", {
-	filmId: smallint("film_id", { unsigned: true }).autoincrement().primaryKey(),
-	title: varchar({ length: 128 }).notNull(),
-	description: text(),
-	releaseYear: year("release_year"),
-	languageId: tinyint("language_id", { unsigned: true }).notNull().references(() => language.languageId, { onDelete: "restrict", onUpdate: "cascade" } ),
-	originalLanguageId: tinyint("original_language_id", { unsigned: true }).references(() => language.languageId, { onDelete: "restrict", onUpdate: "cascade" } ),
-	rentalDuration: tinyint("rental_duration", { unsigned: true }).default(3).notNull(),
-	rentalRate: decimal("rental_rate", { precision: 4, scale: 2, mode: 'number' }).default(4.99).notNull(),
-	length: smallint({ unsigned: true }),
-	replacementCost: decimal("replacement_cost", { precision: 5, scale: 2, mode: 'number' }).default(19.99).notNull(),
-	rating: mysqlEnum(["G","PG","PG-13","R","NC-17"]).default("G"),
-	specialFeatures: customType({ dataType: () => 'set('trailers','commentaries','deleted scenes','behind the scenes')' })("special_features"),
-	lastUpdate: timestamp("last_update").defaultNow().onUpdateNow().notNull(),
-},
-(table) => [
-	index("idx_fk_original_language_id").on(table.originalLanguageId),
-	index("idx_fk_language_id").on(table.languageId),
-	index("idx_title").on(table.title),
-]);
+export const film = mysqlTable(
+  "film",
+  {
+    filmId: smallint("film_id", { unsigned: true })
+      .autoincrement()
+      .primaryKey(),
+    title: varchar({ length: 128 }).notNull(),
+    description: text(),
+    releaseYear: year("release_year"),
+    languageId: tinyint("language_id", { unsigned: true })
+      .notNull()
+      .references(() => language.languageId, {
+        onDelete: "restrict",
+        onUpdate: "cascade",
+      }),
+    originalLanguageId: tinyint("original_language_id", {
+      unsigned: true,
+    }).references(() => language.languageId, {
+      onDelete: "restrict",
+      onUpdate: "cascade",
+    }),
+    rentalDuration: tinyint("rental_duration", { unsigned: true })
+      .default(3)
+      .notNull(),
+    rentalRate: decimal("rental_rate", {
+      precision: 4,
+      scale: 2,
+      mode: "number",
+    })
+      .default(4.99)
+      .notNull(),
+    length: smallint({ unsigned: true }),
+    replacementCost: decimal("replacement_cost", {
+      precision: 5,
+      scale: 2,
+      mode: "number",
+    })
+      .default(19.99)
+      .notNull(),
+    rating: mysqlEnum(["G", "PG", "PG-13", "R", "NC-17"]).default("G"),
+    specialFeatures: customType({
+      dataType: () =>
+        `set('trailers','commentaries','deleted scenes','behind the scenes')`,
+    })("special_features"),
+    lastUpdate: timestamp("last_update").defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    index("idx_fk_original_language_id").on(table.originalLanguageId),
+    index("idx_fk_language_id").on(table.languageId),
+    index("idx_title").on(table.title),
+  ],
+);
 
 export const filmActor = mysqlTable(
   "film_actor",
