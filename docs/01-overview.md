@@ -19,7 +19,7 @@ SQL の学習内容（書籍「初めてのSQL」）を、実際に動くアプ�
 ## 技術スタック
 
 | 役割 | 採用 | 選定理由 |
-|---|---|---|
+| --- | --- | --- |
 | フレームワーク | Next.js（App Router） | Server Actions で API 層を挟まずに DB へ到達できる |
 | 言語 | TypeScript | スタック全体を型で貫く |
 | ORM | Drizzle ORM | SQL に近い記述。学んだ SQL の知識がそのまま活きる |
@@ -30,65 +30,53 @@ SQL の学習内容（書籍「初めてのSQL」）を、実際に動くアプ�
 | Lint / Format | Biome | ESLint + Prettier を1つに集約 |
 | 認証 | Auth.js v5（Credentials） | `staff` テーブルをそのままログインユーザーにできる |
 | テスト | Vitest | 実DBに接続してクエリを検証する。モックは使わない |
-| DB | MySQL 8.0（Docker） | 既存の `docker-compose.yml` をそのまま使う |
-
-### 採用しなかったもの
-
-- **Hono** — UI を含むアプリ全体を作るため、フロント／バックを分ける利点が薄い
-- **Better Auth** — 独自の user / session テーブルを持つ設計のため、`staff` テーブルを主体にしづらい
-- **Cognito** — AWS 環境構築のコストが学習目的に見合わない
-- **seed スクリプト** — `db/init/02-sakila-data.sql` に実データが入っており不要
+| DB | MySQL 8.0（Docker） | 既存の `compose.yml` をそのまま使う |
 
 ## ディレクトリ構成（想定）
 
 ```
-SQL-TRAINING/
+sakila-app/
 ├── db/init/                    # 既存: sakila スキーマ + データ
-├── docker-compose.yml          # 既存: MySQL 8.0
-├── docs/                       # 既存: 書籍の章まとめ
-├── web-docs/                   # 本ドキュメント群
-└── web/                        # ← これから作る Next.js アプリ
-    ├── src/
-    │   ├── app/
-    │   │   ├── (auth)/login/           # 認証前
-    │   │   └── (dashboard)/            # 認証後（layout でセッション必須化）
-    │   │       ├── films/
-    │   │       ├── customers/
-    │   │       ├── rentals/
-    │   │       ├── inventory/
-    │   │       └── reports/
-    │   ├── components/
-    │   │   ├── ui/                     # shadcn/ui 生成物
-    │   │   └── features/               # 機能単位のコンポーネント
-    │   ├── db/
-    │   │   ├── schema/                 # Drizzle スキーマ（テーブルごとに分割）
-    │   │   └── index.ts                # db インスタンス
-    │   ├── features/                   # 機能単位のサーバー処理
-    │   │   └── <feature>/
-    │   │       ├── queries.ts          # 参照系
-    │   │       ├── actions.ts          # 'use server'。認証・検証・Tx境界
-    │   │       ├── core.ts             # 業務ロジック（テスト対象）
-    │   │       └── schema.ts           # Zod スキーマ
-    │   └── lib/
-    │       ├── auth.ts                 # Auth.js 設定
-    │       └── app-date.ts             # 集計の基準日
-    ├── tests/
-    │   ├── setup.ts
-    │   ├── unit/                       # DB不要
-    │   └── db/                         # DB接続あり
-    ├── drizzle.config.ts
-    ├── vitest.config.ts
-    └── biome.json
+├── compose.yml                 # 既存: MySQL 8.0
+├── docs/                       # 本ドキュメント群
+├── src/
+│   ├── app/
+│   │   ├── (auth)/login/       # 認証前
+│   │   └── (dashboard)/        # 認証後（layout でセッション必須化）
+│   │       ├── films/
+│   │       ├── customers/
+│   │       ├── rentals/
+│   │       ├── inventory/
+│   │       └── reports/
+│   ├── components/
+│   │   ├── ui/                 # shadcn/ui 生成物
+│   │   └── features/           # 機能単位のコンポーネント
+│   ├── db/
+│   │   ├── schema/             # Drizzle スキーマ（テーブルごとに分割）
+│   │   └── index.ts            # db インスタンス
+│   ├── features/               # 機能単位のサーバー処理
+│   │   └── <feature>/
+│   │       ├── queries.ts      # 参照系
+│   │       ├── actions.ts      # 'use server'。認証・検証・Tx境界
+│   │       ├── core.ts         # 業務ロジック（テスト対象）
+│   │       └── schema.ts       # Zod スキーマ
+│   └── lib/
+│       ├── auth.ts             # Auth.js 設定
+│       └── app-date.ts         # 集計の基準日
+├── tests/
+│   ├── setup.ts
+│   ├── unit/                   # DB不要
+│   └── db/                     # DB接続あり
+├── drizzle.config.ts
+└── vitest.config.ts
 ```
-
-アプリを `web/` 配下に置くのは、リポジトリ直下の学習用ファイル（`docs/`、`book.pdf`）と混ざらないようにするため。
 
 ## データの前提
 
 `db/init/02-sakila-data.sql` に投入済みのデータ量は以下のとおり。
 
 | テーブル | 件数 | | テーブル | 件数 |
-|---|---:|---|---|---:|
+| --- | ---: | --- | --- | ---: |
 | `film` | 1,000 | | `rental` | 16,044 |
 | `film_text` | 1,000 | | `payment` | 16,044 |
 | `film_actor` | 5,462 | | `inventory` | 4,581 |
@@ -120,7 +108,7 @@ rental / payment の期間: 2005-05-24 〜 2006-02-14
 **3. `staff.password` が SHA1、しかも1件は NULL**
 
 | staff_id | username | password |
-|---|---|---|
+| --- | --- | --- |
 | 1 | `Mike` | `8cb2237d...`（SHA1） |
 | 2 | `Jon` | `NULL` |
 
@@ -129,7 +117,7 @@ rental / payment の期間: 2005-05-24 〜 2006-02-14
 ## ドキュメント一覧
 
 | # | ドキュメント | 内容 |
-|---|---|---|
+| --- | --- | --- |
 | 01 | [概要](./01-overview.md) | 本ドキュメント |
 | 02 | [ER図・テーブル定義](./02-er-diagram.md) | スキーマ構造と Drizzle 型対応 |
 | 03 | [画面設計](./03-screens.md) | ルーティングと画面遷移 |
@@ -144,7 +132,7 @@ rental / payment の期間: 2005-05-24 〜 2006-02-14
 実装は以下の順で積み上げると、前段の成果が次段で必ず使われる形になる。
 
 | 段階 | 内容 | 得られるもの |
-|---|---|---|
+| --- | --- | --- |
 | 1 | プロジェクト初期化・Drizzle 接続 | DB に繋がる |
 | 2 | スキーマ定義（中核テーブル手書き） | 型付きのテーブル定義 |
 | 3 | Vitest 導入・テスト用DB | 以降の実装を検証できる |
@@ -156,6 +144,18 @@ rental / payment の期間: 2005-05-24 〜 2006-02-14
 
 段階4までを終えると「DBに繋がり、テストが書け、ログインでき、型が通る」土台ができる。
 以降の画面はこの土台の上で同じパターンの反復になる。
+
+### 最初の完成単位
+
+21画面をまとめて完成させようとせず、最初の完成単位は以下に絞る。
+
+1. Drizzle 接続、テスト用DB、認証
+2. 作品一覧・詳細（検索、JOIN、ページネーション）
+3. 顧客詳細
+4. レンタル受付・返却と、そのDBテスト
+
+この4つが動けば、認証・参照・入力検証・トランザクションを一周できる。
+俳優、ランキング、ダッシュボードはこの縦の流れを完成させた後の演習とする。
 
 テスト環境を認証より前に置いたのは、多段 JOIN の正しさを目視で確認できないため。
 `rental → inventory → film` のような経路は、実データに対する検証がないと誤りに気づけない。

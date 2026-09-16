@@ -114,6 +114,17 @@ daysOverdue           // not: overdue
 `computeCustomerBalance` は `compute*` 接頭辞。
 計算を伴う処理で、単純なアクセサではないことを示す。
 
+### staff
+
+| 関数 | 引数 | 返り値 | 対応機能 |
+|---|---|---|---|
+| `locateStaffByStore` | `storeId`, 検索条件 + ページ | スタッフ一覧 + 総件数 | F-17 |
+| `fetchStaffProfile` | `staffId` | スタッフ + 住所 | F-17 |
+| `fetchStoreManager` | `storeId` | 店長の `staffId` | F-17 |
+
+店長判定には `fetchStoreManager` 相当のDB問い合わせを使う。JWT 内の値だけで判定すると、
+店長移管後のセッションが古い権限を持ち続けるためである。
+
 ### rentals
 
 | 関数 | 引数 | 返り値 | 対応機能 |
@@ -128,11 +139,11 @@ daysOverdue           // not: overdue
 
 | 関数 | 引数 | 返り値 | 対応機能 |
 |---|---|---|---|
-| `computeMonthlySales` | 期間 | 月次売上 | F-14 |
-| `computeSalesByStore` | 期間 | 店舗別売上 | F-14 |
-| `computeSalesByStaff` | 期間 | スタッフ別売上 | F-14 |
-| `rankFilmsByRentalCount` | 期間, 件数 | 作品ランキング | F-15 |
-| `rankCustomersBySpending` | 期間, 件数 | 顧客ランキング | F-16 |
+| `computeMonthlySales` | `from`, `toExclusive` | 月次売上 | F-14 |
+| `computeSalesByStore` | `from`, `toExclusive` | 店舗別売上 | F-14 |
+| `computeSalesByStaff` | `from`, `toExclusive` | スタッフ別売上 | F-14 |
+| `rankFilmsByRentalCount` | `from`, `toExclusive`, 件数 | 作品ランキング | F-15 |
+| `rankCustomersBySpending` | `from`, `toExclusive`, 件数 | 顧客ランキング | F-16 |
 | `fetchInventorySummary` | フィルタ | 在庫集計 | F-13 |
 
 ## Server Action 一覧
@@ -140,12 +151,24 @@ daysOverdue           // not: overdue
 | Action | 入力 | トランザクション | 対応機能 |
 |---|---|---|---|
 | `registerCustomer` | 氏名, メール, 住所, 店舗 | **必要**（address + customer） | F-08 |
-| `updateCustomer` | `customerId` + 変更内容 | 必要な場合あり | F-08 |
+| `updateCustomer` | `customerId` + 変更内容 | **必要**（customer + address を同時に更新するため） | F-08 |
 | `deactivateCustomer` | `customerId` | 不要 | F-08 |
+| `reactivateCustomer` | `customerId` | 不要 | F-08 |
+| `registerStaff` | 氏名, メール, 住所, 初期パスワード | **必要**（address + staff） | F-17 |
+| `updateStaff` | `staffId` + 変更内容 | **必要**（staff + address を同時に更新するため） | F-17 |
+| `deactivateStaff` | `staffId` | 店長移管時のみ必要 | F-17 |
+| `reactivateStaff` | `staffId`, 一時パスワード | 不要 | F-17 |
+| `resetStaffPassword` | `staffId`, 一時パスワード | 不要 | F-17 |
+| `changeOwnPassword` | 現在 / 新パスワード | 不要 | F-17 |
 | `createRental` | `customerId`, `filmId` | **必要**（rental + payment） | F-09 |
 | `returnRental` | `rentalId` | 不要 | F-10 |
 
-更新系はこの5つだけ。参照が中心のアプリになる。
+更新系は顧客・スタッフ管理を含めても少数で、参照が中心のアプリになる。
+
+スタッフ管理 Action はすべて最初に `requireStoreManager()` を呼ぶ。このヘルパーは
+セッションの `staffId` を取得し、DB 上の `store.manager_staff_id` と照合して、
+対象スタッフが同じ店舗に所属することも確認する。 `changeOwnPassword` だけは本人の
+Action なので店長権限を要求しない。
 
 ## Server Action の型
 
@@ -203,7 +226,7 @@ export async function performRental(
   input: CreateRentalInput,
   staffId: number,
 ): Promise<number> {
-  // 在庫確定 → rental INSERT → payment INSERT
+  // active な顧客を確認 → 在庫をロックして確定 → rental INSERT → payment INSERT
 }
 ```
 
@@ -244,9 +267,10 @@ Next.js はデータをキャッシュするため、更新後に `revalidatePat
 
 ```ts
 await db.transaction(async (tx) => {
-  // 1. 在庫を確定してロック
-  // 2. rental を INSERT
-  // 3. payment を INSERT（rental_id を紐付け）
+  // 1. 顧客が active であることを確認
+  // 2. 在庫をロックして確定
+  // 3. rental を INSERT
+  // 4. payment を INSERT（rental_id を紐付け）
 })
 ```
 
@@ -268,7 +292,8 @@ sequenceDiagram
 ```
 
 トランザクション内で `SELECT ... FOR UPDATE` を使い、
-在庫行をロックしてから未返却レコードの有無を再確認する。
+在庫行をロックしながら未返却レコードのない候補を確定する。
+候補検索をトランザクションの外で済ませてからロックする形にはしない。
 
 ```sql
 SELECT i.inventory_id
@@ -282,6 +307,9 @@ FOR UPDATE;
 ```
 
 Drizzle では `.for('update')` で表現できる。
+
+`rental` に未返却を一意にする制約はない。このロック取得を `performRental` に
+閉じ込め、ほかの経路で直接 `rental` を INSERT しないことが二重貸出を防ぐ条件になる。
 
 実際にはスタッフ2名で競合は起きないが、
 **なぜロックが必要か**を理解する題材として意味がある。
@@ -438,7 +466,7 @@ sql`MATCH(${filmText.title}, ${filmText.description}) AGAINST (${keyword} IN BOO
 ## 日付の扱い
 
 [04-features.md](./04-features.md) F-02 のとおり、データが 2005〜2006年のため
-基準日を固定する。
+基準時刻を固定する。
 
 ```ts
 // lib/app-date.ts
@@ -450,6 +478,8 @@ export function appNow(): Date {
 
 `new Date()` を直接書かず、必ずこの関数を経由する。
 集計・延滞判定・レンタル登録日のすべてが同じ基準で動く。
+`APP_TODAY` には `2006-02-14T00:00:00Z` のような UTC の ISO 8601 時刻を入れる。
+`YYYY-MM-DD` だけの値はタイムゾーンの解釈が曖昧になるため使わない。
 
 実データに切り替えるときは環境変数を外すだけで済む。
 

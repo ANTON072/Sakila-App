@@ -8,6 +8,7 @@ App Router の Route Group を使い、認証前後を `(auth)` と `(dashboard)
 | パス | 画面名 | 認証 | 主な使用テーブル |
 |---|---|---|---|
 | `/login` | ログイン | 不要 | `staff` |
+| `/account/password` | 初回パスワード変更 | 必要 | `staff` |
 | `/` | ダッシュボード | 必要 | `rental`, `payment`, `inventory` |
 | `/films` | 作品一覧 | 必要 | `film`, `category`, `language` |
 | `/films/[filmId]` | 作品詳細 | 必要 | `film`, `actor`, `category`, `inventory` |
@@ -17,6 +18,9 @@ App Router の Route Group を使い、認証前後を `(auth)` と `(dashboard)
 | `/customers/[customerId]` | 顧客詳細 | 必要 | `customer`, `rental`, `payment` |
 | `/customers/new` | 顧客登録 | 必要 | `customer`, `address` |
 | `/customers/[customerId]/edit` | 顧客編集 | 必要 | `customer`, `address` |
+| `/staff` | スタッフ一覧・管理 | 必要（店長のみ） | `staff`, `store` |
+| `/staff/new` | スタッフ登録 | 必要（店長のみ） | `staff`, `address` |
+| `/staff/[staffId]/edit` | スタッフ編集 | 必要（店長のみ） | `staff`, `address` |
 | `/rentals` | レンタル一覧 | 必要 | `rental`, `customer`, `film` |
 | `/rentals/new` | レンタル受付 | 必要 | `rental`, `payment`, `inventory` |
 | `/rentals/outstanding` | 未返却一覧 | 必要 | `rental`, `customer`, `film` |
@@ -25,7 +29,7 @@ App Router の Route Group を使い、認証前後を `(auth)` と `(dashboard)
 | `/reports/films` | 作品ランキング | 必要 | `rental`, `film`, `category` |
 | `/reports/customers` | 顧客ランキング | 必要 | `payment`, `customer` |
 
-合計17画面。すべてを一度に作る必要はなく、
+合計21画面。すべてを一度に作る必要はなく、
 [01-overview.md](./01-overview.md) の段階表に沿って積み上げる。
 
 ## 画面遷移図
@@ -33,9 +37,12 @@ App Router の Route Group を使い、認証前後を `(auth)` と `(dashboard)
 ```mermaid
 flowchart TD
     Login["/login<br/>ログイン"]
+    Password["/account/password<br/>初回パスワード変更"]
     Dash["/<br/>ダッシュボード"]
 
-    Login -->|認証成功| Dash
+    Login -->|通常の認証成功| Dash
+    Login -->|初回変更が必要| Password
+    Password -->|変更後に再ログイン| Login
     Dash -->|ログアウト| Login
 
     subgraph カタログ
@@ -56,6 +63,12 @@ flowchart TD
         Rentals["/rentals<br/>レンタル一覧"]
         RentalNew["/rentals/new<br/>レンタル受付"]
         Outstanding["/rentals/outstanding<br/>未返却一覧"]
+    end
+
+    subgraph スタッフ管理（店長のみ）
+        Staff["/staff<br/>スタッフ一覧"]
+        StaffNew["/staff/new<br/>スタッフ登録"]
+        StaffEdit["/staff/[staffId]/edit<br/>スタッフ編集"]
     end
 
     subgraph レポート
@@ -85,6 +98,12 @@ flowchart TD
     CustomerNew --> CustomerDetail
     CustomerEdit --> CustomerDetail
 
+    Dash --> Staff
+    Staff --> StaffNew
+    Staff --> StaffEdit
+    StaffNew --> Staff
+    StaffEdit --> Staff
+
     Rentals --> CustomerDetail
     Rentals --> FilmDetail
     Outstanding -->|返却処理| Outstanding
@@ -107,6 +126,19 @@ flowchart TD
 | 成功時 | `/` へリダイレクト |
 
 `staff.active = false` のスタッフはログインを拒否する。
+`must_change_password = true` のスタッフはログイン後、パスワード変更を完了するまで
+`/account/password` とログアウト以外の画面へ進めない。
+
+### `/account/password` — 初回パスワード変更
+
+スタッフ登録・再有効化・パスワード再発行の後に使う画面。
+
+| 要素 | 内容 |
+|---|---|
+| 入力 | 現在の一時パスワード、新しいパスワード、確認入力 |
+| 送信 | 現在のパスワードを bcrypt で照合してから新しいハッシュを保存 |
+| 成功時 | サインアウト後、再ログイン画面へ遷移 |
+| 制約 | `must_change_password = false` になるまで他画面・他 Action を使えない |
 
 ### `/` — ダッシュボード
 
@@ -171,6 +203,28 @@ flowchart TD
 | 支払い | 支払い履歴と累計額 |
 | 未払い | `get_customer_balance` 相当の残高 |
 | 操作 | 「編集」「この顧客に貸し出す」 |
+
+### `/staff` — スタッフ一覧・管理
+
+店長だけが自店舗のスタッフを管理できる画面。別店舗のスタッフは表示・操作ともに対象外。
+
+| 要素 | 内容 |
+|---|---|
+| 表示列 | 氏名 / ユーザー名 / メール / 有効状態 / 初回変更の要否 |
+| 検索 | 氏名、ユーザー名、メールアドレス |
+| 操作 | 「新規登録」「編集」「無効化 / 再有効化」「一時パスワード再発行」 |
+| 制約 | 自分自身は無効化不可。店長の無効化時は店長移管を先に要求する |
+
+一時パスワードは画面上で一度だけ表示し、保存済みハッシュから復元しない。
+
+### `/staff/new` / `/staff/[staffId]/edit` — スタッフ登録・編集
+
+| 要素 | 内容 |
+|---|---|
+| 入力 | 氏名、ユーザー名、メール、住所。登録・再有効化時は一時パスワード |
+| 店舗 | フォームでは選ばせず、ログイン中の店長の店舗をサーバー側で設定する |
+| 送信 | `address` と `staff` をトランザクションで登録 / 更新する |
+| 成功時 | `/staff` へ戻り、一時パスワードを伝達するよう案内する |
 
 ### `/rentals/new` — レンタル受付
 

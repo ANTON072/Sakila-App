@@ -260,7 +260,7 @@ type FilmRow = Awaited<ReturnType<typeof locateFilms>>[number]
 | インポート順 | Biome の `organizeImports` を有効化 |
 | 保存時実行 | `.vscode/settings.json` で formatOnSave |
 
-既に `.vscode/` があるため、`web/` 配下用の設定を追記する形になる。
+既に `.vscode/` があるため、リポジトリ直下の設定を追記する形になる。
 
 shadcn/ui の生成コードは Biome の一部ルールに引っかかることがある。
 `ui/` ディレクトリを lint の対象外にするか、該当ルールを緩める。

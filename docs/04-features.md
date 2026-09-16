@@ -29,6 +29,7 @@
 | F-14 | 売上レポート | `/reports/sales` | ★★★ | 参照 |
 | F-15 | 作品ランキング | `/reports/films` | ★★ | 参照 |
 | F-16 | 顧客ランキング | `/reports/customers` | ★★ | 参照 |
+| F-17 | スタッフ管理・初回パスワード変更 | `/staff` | ★★★ | 更新 |
 
 ---
 
@@ -85,9 +86,13 @@ sakila のデータは **2005-05-24 〜 2006-02-14** で止まっている。
 | B | データ範囲の最終日（`MAX(rental_date)`）を動的に基準日とする | データ依存だが自動追従する |
 | C | 期間を必ずユーザーに選ばせ、既定値をデータ範囲にする | レポート画面には適するが、ダッシュボードには煩雑 |
 
-案Aを基本とし、`APP_TODAY=2006-02-14` のような環境変数を用意する。
+案Aを基本とし、`APP_TODAY=2006-02-14T00:00:00Z` のような環境変数を用意する。
 日付を扱う関数を1箇所（例: `lib/app-date.ts`）にまとめておくと、
 後から実データに切り替える際の変更範囲が小さくて済む。
+
+`APP_TODAY` は日付文字列ではなく UTC の**時刻**として扱う。`new Date('2006-02-14')` の
+ようなタイムゾーンが暗黙の値を使わず、DB 接続のタイムゾーンも UTC に統一する。
+返却・貸出の記録、延滞判定、レポートの期間境界で同じ値を使う。
 
 ---
 
@@ -223,6 +228,11 @@ sakila の `get_customer_balance` 関数と同じ考え方を使う。
 延滞料金は「返却期限を超えた日数 × 日割り料金」で計算される。
 既存関数の中身を読んで、同じロジックを Drizzle で再現するのが学習として有効。
 
+このアプリの初期スコープでは、延滞料金を返却時に `payment` へ追加しない。
+未払い残高は `baseDate` 時点の**表示用の見積額**であり、既存の `payment` は
+貸出時の `rental_rate` のみを記録する。会計の追加入力を実装する場合は、
+残高の算出方法とともに別機能として追加する。
+
 ---
 
 ## F-08. 顧客登録・編集
@@ -245,6 +255,46 @@ flowchart LR
 `customer.create_date` は NOT NULL かつ既定値なしなので、
 アプリ側で明示的に値を入れる必要がある。
 
+編集で `customer` と関連する `address` の両方を更新する場合も、登録と同じく
+トランザクションで囲む。片方だけ更新された顧客情報を残さないためである。
+
+### 顧客の無効化・再有効化
+
+顧客は物理削除しない。既存の `customer.active` を使い、無効化時は `false`、
+再有効化時は `true` に更新する。無効な顧客は新規レンタルを受け付けない。
+
+未返却レンタルがある顧客は無効化できない。先に返却を完了させることで、
+「無効な顧客がDVDを借りたまま」という業務上の矛盾を防ぐ。
+
+---
+
+## F-17. スタッフ管理・初回パスワード変更
+
+**使用テーブル:** `staff`, `address`, `store`
+
+店長（`store.manager_staff_id = session.user.staffId`）だけが、自店舗に所属する
+スタッフを管理できる。店長判定と対象スタッフの `store_id` は、各 Action で DB から
+確認する。フォームが送った `storeId` や「店長である」という値を信用しない。
+
+| 操作 | 処理 |
+|---|---|
+| 登録 | `address` と `staff` をトランザクションで INSERT。店長の店舗を自動設定する |
+| 編集 | 氏名・メール・住所を更新。 `staff` と `address` を同時に変える場合はトランザクション |
+| 無効化 | 既存の `staff.active` を false に更新。物理削除はしない |
+| 再有効化 | `active = true` と一時パスワードの bcrypt ハッシュを保存し、初回変更を再度強制する |
+| 初期パスワード再発行 | bcrypt ハッシュを保存し、 `must_change_password = true` に戻す |
+| 初回パスワード変更 | 本人が新しい bcrypt ハッシュを保存し、 `must_change_password = false` にする |
+
+新規登録・再発行では、店長が一時パスワードを安全な経路で本人へ渡す。メール送信や
+招待トークンは初期スコープ外とする。実装する場合は `staff` にトークンを足すのではなく、
+有効期限・使用済み状態・再送履歴を持つ招待専用テーブルを別途設ける。
+
+### 無効化時の制約
+
+- 自分自身は無効化できない
+- 店長を無効化する前に、同じ店舗の有効なスタッフへ `store.manager_staff_id` を移管する
+- 過去の `rental` / `payment` は担当者として残すため、 `staff` の物理削除はしない
+
 ---
 
 ## F-09. レンタル受付
@@ -262,10 +312,10 @@ sequenceDiagram
     participant DB as MySQL
 
     U->>A: 顧客ID + 作品ID
-    A->>DB: 貸出可能な inventory を1件選ぶ
-    DB-->>A: inventory_id
     A->>DB: BEGIN
-    A->>DB: 在庫を再確認（未返却 rental がないか）
+    A->>DB: 顧客が active であることを確認
+    A->>DB: 貸出可能な inventory をロックして1件選ぶ
+    DB-->>A: inventory_id
     A->>DB: rental を INSERT
     A->>DB: payment を INSERT（rental_id を紐付け）
     A->>DB: COMMIT
@@ -274,7 +324,8 @@ sequenceDiagram
 
 ### 貸出可能な在庫の選び方
 
-「その作品の在庫のうち、未返却レコードが存在しないもの」を1件取る。
+「その作品の在庫のうち、未返却レコードが存在しないもの」を**トランザクション内で**
+1件取る。トランザクション外で候補を表示用に検索するのはよいが、確定に使ってはいけない。
 
 ```sql
 SELECT i.inventory_id
@@ -285,7 +336,8 @@ LEFT JOIN rental r
 WHERE i.film_id = :filmId
   AND i.store_id = :storeId
   AND r.rental_id IS NULL
-LIMIT 1;
+LIMIT 1
+FOR UPDATE;
 ```
 
 `LEFT JOIN` + `IS NULL` で「該当なし」を絞り込む形。
@@ -301,8 +353,12 @@ LIMIT 1;
 | A | `SELECT ... FOR UPDATE` で在庫行をロックしてから INSERT | 確実。学習としても価値が高い |
 | B | `rental` の `UNIQUE(rental_date, inventory_id, customer_id)` に任せる | 同一秒・同一顧客しか防げず不十分 |
 
-**案Aを推奨**。スタッフ2名の学習用アプリでは実際には競合しないが、
-トランザクション分離レベルとロックを体験する題材として意味がある。
+**案Aを採用する**。`rental` には「未返却は inventory ごとに1件」という
+データベース制約がないため、すべての貸出処理がこの在庫ロックを取得することを
+アプリケーションの不変条件とする。`performRental` 以外からの `rental` INSERT は作らない。
+
+スタッフ2名の学習用アプリでは実際には競合しにくいが、同じ在庫に対する同時実行で
+片方だけ成功するDBテストを作る。トランザクション分離レベルとロックを体験する題材になる。
 
 ### 支払い金額
 
@@ -317,9 +373,9 @@ LIMIT 1;
 
 ## F-10. 返却処理
 
-**使用テーブル:** `rental`, `film`, `inventory`
+**使用テーブル:** `rental`
 
-`rental.return_date` に現在時刻を入れるだけの単純な更新。
+`rental.return_date` に `appNow()` が返すアプリ時刻を入れるだけの単純な更新。
 
 ```sql
 UPDATE rental
@@ -331,8 +387,8 @@ WHERE rental_id = :rentalId
 `AND return_date IS NULL` を付けることで、
 二重クリックや画面の再送信による上書きを防げる。更新件数が0なら「既に返却済み」と判定する。
 
-延滞していた場合の追加料金を `payment` に登録するかどうかは設計判断。
-最初は返却のみ実装し、余裕があれば延滞料金を足す、という順序でよい。
+初期スコープでは、延滞していても `payment` は追加しない。F-07 の未払い残高で
+基準日時点の延滞料金を計算・表示する方針と揃える。
 
 ---
 
@@ -346,7 +402,7 @@ WHERE rental_id = :rentalId
 SELECT r.rental_id, r.rental_date,
        c.first_name, c.last_name, f.title,
        DATE_ADD(r.rental_date, INTERVAL f.rental_duration DAY) AS due_date,
-       DATEDIFF(:baseDate, DATE_ADD(r.rental_date, INTERVAL f.rental_duration DAY)) AS days_overdue
+       GREATEST(0, DATEDIFF(:baseDate, DATE_ADD(r.rental_date, INTERVAL f.rental_duration DAY))) AS days_overdue
 FROM rental r
 JOIN customer c  ON r.customer_id = c.customer_id
 JOIN inventory i ON r.inventory_id = i.inventory_id
@@ -419,12 +475,15 @@ SELECT DATE_FORMAT(payment_date, '%Y-%m') AS month,
        SUM(amount) AS total,
        COUNT(*) AS count
 FROM payment
-WHERE payment_date BETWEEN :from AND :to
+WHERE payment_date >= :from
+  AND payment_date < :toExclusive
 GROUP BY month
 ORDER BY month;
 ```
 
-期間の既定値は 2005-05-01 〜 2006-02-28 にしておく。
+期間の既定値は `from = 2005-05-01T00:00:00Z`、
+`toExclusive = 2006-03-01T00:00:00Z` にしておく。
+終了日時を含める `BETWEEN` ではなく半開区間にすると、最終日の時刻を取りこぼさない。
 空のグラフを見せないための配慮で、F-02 の基準日の話と同じ理由。
 
 ---
@@ -440,6 +499,8 @@ SELECT f.film_id, f.title, COUNT(*) AS rental_count
 FROM rental r
 JOIN inventory i ON r.inventory_id = i.inventory_id
 JOIN film f      ON i.film_id = f.film_id
+WHERE r.rental_date >= :from
+  AND r.rental_date < :toExclusive
 GROUP BY f.film_id, f.title
 ORDER BY rental_count DESC
 LIMIT 20;
@@ -461,7 +522,8 @@ SELECT c.customer_id, c.first_name, c.last_name,
        COUNT(*) AS payment_count
 FROM payment p
 JOIN customer c ON p.customer_id = c.customer_id
-WHERE p.payment_date BETWEEN :from AND :to
+WHERE p.payment_date >= :from
+  AND p.payment_date < :toExclusive
 GROUP BY c.customer_id, c.first_name, c.last_name
 ORDER BY total_paid DESC
 LIMIT 20;
@@ -480,7 +542,6 @@ LIMIT 20;
 |---|---|
 | 顧客向け画面 | スタッフ用社内ツールに用途を統一する |
 | 作品の登録・編集 | `film_text` を更新するトリガーがあり、副作用の理解が別テーマになる |
-| スタッフ管理（CRUD） | 2名固定でよい。認証の題材としてのみ使う |
 | 店舗管理 | 2店舗固定 |
 | 画像アップロード | `staff.picture` は BLOB だが、ファイル管理は別テーマ |
 | 多言語対応 | UI は日本語のみ |

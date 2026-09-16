@@ -13,8 +13,8 @@
 | --- | --- | --- |
 | 01 | [概要](./01-overview.md) | 目的、技術スタック、ディレクトリ構成、データの前提 |
 | 02 | [ER図・テーブル定義](./02-er-diagram.md) | 16テーブルの構造、Drizzle 型対応表 |
-| 03 | [画面設計](./03-screens.md) | 17画面のルーティングと画面遷移 |
-| 04 | [機能一覧](./04-features.md) | 16機能の仕様、使用テーブル、SQLの要点 |
+| 03 | [画面設計](./03-screens.md) | 21画面のルーティングと画面遷移 |
+| 04 | [機能一覧](./04-features.md) | 17機能の仕様、使用テーブル、SQLの要点 |
 | 05 | [認証設計](./05-auth.md) | Auth.js + `staff` テーブル、bcrypt 移行 |
 | 06 | [データアクセス設計](./06-data-access.md) | Query / Server Action、トランザクション |
 | 07 | [コンポーネント設計](./07-components.md) | Server/Client の切り分け、共通部品 |
@@ -83,13 +83,13 @@ macOS では Docker のバインドマウント越しのファイル監視で HM
 
 ```
 docker compose up -d      # MySQL（開発用 3306 / テスト用 3307）
-cd web && pnpm dev        # Next.js
+pnpm dev                   # Next.js
 ```
 
 接続確認。
 
 ```bash
-docker exec hajimete-no-sql-mysql mysql -uroot -psakila sakila -e "SELECT COUNT(*) FROM film;"
+docker compose exec mysql mysql -uroot -psakila sakila -e "SELECT COUNT(*) FROM film;"
 ```
 
 `1000` が返れば DB は正常。
@@ -128,5 +128,5 @@ bcrypt への移行手順を [05-auth.md](./05-auth.md) に記載。
 | --- | --- |
 | `db/init/01-sakila-schema.sql` | スキーマ定義（本ドキュメントの出典） |
 | `db/init/02-sakila-data.sql` | 投入済みデータ |
-| `docker-compose.yml` | MySQL 8.0 の起動設定 |
+| `compose.yml` | MySQL 8.0 の起動設定 |
 | `docs/` | 書籍「初めてのSQL」の章まとめ |

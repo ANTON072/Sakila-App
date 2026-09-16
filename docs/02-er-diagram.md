@@ -191,14 +191,32 @@ Drizzle でこの2つをどう表現するかは後述の型対応表を参照�
 | `first_name` / `last_name` | VARCHAR(45) | × | |
 | `address_id` | SMALLINT UNSIGNED | × | FK → `address` |
 | `picture` | BLOB | ○ | PNG が入っている |
-| `email` | VARCHAR(50) | ○ | |
+| `email` | VARCHAR(50) | ○ | 将来の連絡先。アプリ拡張後は UNIQUE |
 | `store_id` | TINYINT UNSIGNED | × | FK → `store` |
 | `active` | BOOLEAN | × | 既定 TRUE |
-| `username` | VARCHAR(16) | × | |
-| `password` | VARCHAR(40) | ○ | SHA1 想定の桁数 |
+| `username` | VARCHAR(16) | × | アプリ拡張後は UNIQUE |
+| `password` | VARCHAR(40) | ○ | SHA1 想定の桁数。アプリ拡張後は VARCHAR(255) |
 
 `password` が VARCHAR(40) なのは SHA1（16進40桁）を格納する前提だから。
 bcrypt は60文字なので**カラム拡張が必要**。[05-auth.md](./05-auth.md) を参照。
+
+### アプリ用の staff 拡張
+
+初期SQLは変更せず、次の変更を Drizzle マイグレーションで適用する。
+
+| 変更 | 用途 |
+|---|---|
+| `password` を `VARCHAR(255)` に拡張 | bcrypt ハッシュを保存する |
+| `must_change_password BOOLEAN NOT NULL DEFAULT TRUE` を追加 | 初回ログイン後の変更を強制する |
+| `UNIQUE(username)` を追加 | ログイン名の重複を防ぐ |
+| `UNIQUE(email)` を追加 | 連絡先・将来の招待先を一意にする |
+
+既存データに重複した `username` / 非NULLの `email` がないことを確認してから UNIQUE を追加する。
+MySQL の UNIQUE は複数の NULL を許容するため、既存の NULL 値とは両立する。
+
+スタッフの権限用に `role` カラムは追加しない。 `store.manager_staff_id` が
+現在の店舗の店長を表すため、スタッフ管理は「店長が自店舗のスタッフを管理する」
+という既存の関係から判定できる。
 
 ### store — 店舗
 

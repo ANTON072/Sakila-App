@@ -10,7 +10,7 @@ HMR が目に見えて遅くなる。バージョンの再現性は Volta で確
 
 | 対象 | 実行環境 | 理由 |
 |---|---|---|
-| MySQL（開発用） | Docker | 既存の `docker-compose.yml` |
+| MySQL（開発用） | Docker | 既存の `compose.yml` |
 | MySQL（テスト用） | Docker | 別ポートで隔離 |
 | Next.js | ネイティブ Node | HMR の速度、エディタ連携 |
 
@@ -19,85 +19,51 @@ Docker 化する価値があるのは「チームで環境を揃える」「本�
 
 ## 前提ツール
 
-導入済みのバージョン（確認日: 2026-09-15）。
+導入済みのバージョン（確認日: 2026-09-16）。
 
 | ツール | バージョン | 用途 |
 |---|---|---|
-| Node | 24.19.0 | 実行環境 |
-| pnpm | 11.22.0 | パッケージ管理 |
+| Node | 24.21.0 | 実行環境 |
+| pnpm | 12.4.1 | パッケージ管理 |
 | Volta | 2.0.2 | Node / pnpm のバージョン固定 |
 | Docker | 29.7.2 | DB |
 | Docker Compose | 5.4.0 | 同上 |
 
 ## セットアップ手順
 
-### 1. corepack を無効化する
+### 1. 既存の Next.js プロジェクトを使う
 
-Volta と corepack はどちらも pnpm のバージョンを管理できる。
-両方が有効だと、`package.json` の `packageManager` フィールド（corepack）と
-`volta` フィールドのどちらが効いているか分からなくなる。
+このリポジトリは直下が既に Next.js アプリである。`web/` ディレクトリを作らず、
+以降の依存追加・環境変数・コマンドはすべてリポジトリ直下で扱う。
 
-**Volta に寄せるため corepack を切る。**
+Node のバージョンは `package.json` の `volta.node`、pnpm のバージョンは
+`packageManager` フィールドを正とする。corepack を無効化しない。
 
-```
-corepack disable
-```
-
-以降 `package.json` に `packageManager` フィールドを書かない。
-バージョン指定は `volta` フィールドに一本化する。
-
-### 2. Next.js プロジェクトを作る
-
-リポジトリ直下ではなく `web/` に作る。
-学習用ファイル（`docs/`、`book.pdf`）と混ざらないようにするため。
+### 2. バージョンを確認する
 
 ```
-pnpm create next-app@latest web --typescript --app --src-dir --no-eslint
+node -v
+pnpm -v
 ```
 
-| オプション | 理由 |
-|---|---|
-| `--typescript` | 全体を TypeScript で通す |
-| `--app` | App Router |
-| `--src-dir` | `src/` 配下にまとめる（[01-overview.md](./01-overview.md) の構成） |
-| `--no-eslint` | Biome を使うため ESLint は入れない |
+期待値は Node `v24.21.x`、pnpm `12.4.x`。
+新たにバージョンを更新する場合は、`package.json` の `volta.node` と
+`packageManager` を同時に更新する。
 
-Tailwind は shadcn/ui が前提にしているため入れる。
-
-### 3. Volta でバージョンを固定する
-
-```
-cd web
-volta pin node@24
-volta pin pnpm@11
-```
-
-`package.json` に `volta` フィールドが書き込まれ、
-このディレクトリに入ると自動的に指定バージョンが使われる。
-
-```json
-{
-  "volta": {
-    "node": "24.19.0",
-    "pnpm": "11.22.0"
-  }
-}
-```
-
-Docker を使わなくてもバージョンの再現性はこれで確保される。
-
-### 4. テスト用DBを docker-compose に追加する
+### 3. テスト用DBを確認する
 
 [08-testing.md](./08-testing.md) のとおり、更新系テストのために別サーバーを立てる。
 初期化SQL がスキーマ名 `sakila` を直書きしているため、
 同一サーバーに `sakila_test` を作るには SQL の書き換えが必要になる。
 別コンテナなら衝突しない。
 
+`compose.yml` には既に `mysql-test` が定義されている。新規追加は不要だが、
+構成を確認したい場合は以下を参照する。
+
 ```yaml
-# docker-compose.yml の services に追加
+# compose.yml の services
   mysql-test:
     image: mysql:8.0
-    container_name: hajimete-no-sql-mysql-test
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: sakila
@@ -117,57 +83,74 @@ Docker を使わなくてもバージョンの再現性はこれで確保され�
 
 `tmpfs` にしておくと、テストデータが壊れてもコンテナを作り直すだけで復旧できる。
 
-### 5. 環境変数を用意する
+### 4. 環境変数を用意する
 
 開発用とテスト用で接続先が変わる。
 
 ```
-# web/.env.local  （コミットしない）
+# .env.local  （コミットしない）
 DATABASE_URL=mysql://root:sakila@localhost:3306/sakila
 AUTH_SECRET=<openssl rand -base64 32 で生成>
-APP_TODAY=2006-02-14
+APP_TODAY=2006-02-14T00:00:00Z
 ```
 
 ```
-# web/.env.test  （コミットしてよい。秘匿情報を含めない）
+# .env.test  （コミットしてよい。秘匿情報を含めない）
 DATABASE_URL=mysql://root:sakila@localhost:3307/sakila
-APP_TODAY=2006-02-14
+AUTH_SECRET=test-auth-secret-not-for-production-123456
+APP_TODAY=2006-02-14T00:00:00Z
 ```
 
-`APP_TODAY` はデータが2005〜2006年で止まっているための基準日。
+`APP_TODAY` はデータが2005〜2006年で止まっているための UTC 基準時刻。
 理由は [04-features.md](./04-features.md) F-02 を参照。
 
+Vitest は `.env.local` を読み込まない。そのため、Auth.js を import するテストには
+`.env.test` の固定値 `AUTH_SECRET` も必要になる。テスト用の値は本番で使わないため、
+`.env.test` にコミットしてよい。
+
 `.env.local` は `.gitignore` に入れる。
-`docker-compose.yml` のパスワードは学習用に平文で書かれているが、
+`compose.yml` のパスワードは学習用に平文で書かれているが、
 アプリ側の秘匿情報はコミットしない習慣をつけておく。
 
-### 6. 依存パッケージを入れる
+### 5. 依存パッケージを入れる
 
 ```
+pnpm install
 pnpm add drizzle-orm mysql2 drizzle-zod zod
 pnpm add next-auth@beta bcryptjs
 pnpm add react-hook-form @hookform/resolvers
-pnpm add -D drizzle-kit @biomejs/biome vitest @types/bcryptjs
+pnpm add -D drizzle-kit vitest @next/env
 ```
 
-shadcn/ui は CLI で初期化する。
+`biome.json` と `components.json` は既に存在する。Biome や shadcn/ui の初期化を
+繰り返さない。必要な shadcn/ui 部品だけを追加する。
 
 ```
-pnpm dlx shadcn@latest init
+pnpm dlx shadcn@latest add table
 ```
 
-インストールは時間がかかるため、実行は各自のタイミングで行う。
+Vitest を入れたら、`package.json` の `scripts` に以下を追加する。
+
+```json
+{
+  "test": "vitest",
+  "test:unit": "vitest run tests/unit",
+  "test:db": "vitest run tests/db"
+}
+```
+
+`.env.test` を Vitest から読み込む設定は [08-testing.md](./08-testing.md) に従う。
 
 ## 日常の開発フロー
 
 ### 起動
 
 ```
-docker compose up -d
+docker compose up -d --wait
 ```
 
 ```
-cd web && pnpm dev
+pnpm dev
 ```
 
 DB は一度立てれば起動したままでよい。
@@ -176,23 +159,23 @@ DB は一度立てれば起動したままでよい。
 ### 接続確認
 
 ```
-docker exec hajimete-no-sql-mysql mysql -uroot -psakila sakila -e "SELECT COUNT(*) FROM film;"
+docker compose exec mysql mysql -uroot -psakila sakila -e "SELECT COUNT(*) FROM film;"
 ```
 
 `1000` が返れば開発用DBは正常。テスト用は以下。
 
 ```
-docker exec hajimete-no-sql-mysql-test mysql -uroot -psakila sakila -e "SELECT COUNT(*) FROM film;"
+docker compose exec mysql-test mysql -uroot -psakila sakila -e "SELECT COUNT(*) FROM film;"
 ```
 
 ### テスト
 
 ```
-pnpm vitest run tests/unit
+pnpm test:unit
 ```
 
 ```
-pnpm vitest run
+pnpm test
 ```
 
 層1（DB不要）だけなら数百ミリ秒で終わる。
@@ -206,7 +189,14 @@ pnpm vitest run
 `rental` と `payment` が各16,044件あるため、投入完了まで数十秒かかる。
 
 healthcheck が `healthy` になってもデータ投入が終わっているとは限らない。
-テスト実行前に件数を確認するスクリプトを用意しておくと、原因不明の失敗を避けられる。
+テスト実行前に、テスト用DBで `film` が1000件あることを確認する。
+
+```
+docker compose exec mysql-test mysql -N -uroot -psakila sakila -e "SELECT COUNT(*) FROM film;"
+```
+
+`1000` が返る前にテストを開始しない。後で `tests/setup.ts` に同じ待機処理を
+移せば、初期化待ちを自動化できる。
 
 ### 2. `mysql2` が必要
 
@@ -227,16 +217,16 @@ PostgreSQL は 5432 を使うため衝突しない。
 
 ### 4. Volta が効いていないように見えるとき
 
-`volta pin` は `package.json` に書き込むだけなので、
-リポジトリ直下（`web/` の外）では効かない。
-`cd web` してから `node -v` を確認する。
+リポジトリ直下の `package.json` に `volta.node` が定義されていることを確認する。
+その上で、リポジトリ直下で `node -v` を実行する。
 
 ## Biome の設定
 
-ESLint を入れていないため、Lint と Format は Biome に集約する。
+ESLint を入れていないため、Lint と Format は既存の Biome 設定に集約する。
 
 ```
-pnpm biome init
+pnpm lint           # 検査のみ
+pnpm check          # 検査と自動修正
 ```
 
 既に `.vscode/` があるので、保存時フォーマットの設定を追記する。
@@ -250,8 +240,8 @@ shadcn/ui の生成コードは Biome の一部ルールに引っかかること
 
 | 確認 | 期待 |
 |---|---|
-| `cd web && node -v` | `v24.x` |
-| `pnpm -v` | `11.x` |
+| `node -v` | `v24.21.x` |
+| `pnpm -v` | `12.4.x` |
 | `docker compose ps` | `mysql` と `mysql-test` が `healthy` |
 | 開発用DBの `film` 件数 | 1000 |
 | テスト用DBの `film` 件数 | 1000 |

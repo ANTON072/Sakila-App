@@ -25,7 +25,7 @@ flowchart LR
 | 1 | `Mike` | `8cb2237d0679ca88db6464eac60da96345513964` | 1 | 1 |
 | 2 | `Jon` | `NULL` | 2 | 1 |
 
-問題が3つある。
+問題が4つある。
 
 ### 1. パスワードが SHA1
 
@@ -41,6 +41,11 @@ SHA1 はソルトなし・高速で、パスワード保存には使ってはい
 `password VARCHAR(40)` は SHA1 の16進40桁にちょうど合わせた長さ。
 bcrypt のハッシュは**60文字**なので、このままでは格納できない。
 
+### 4. スタッフ管理に必要な制約がない
+
+`username` と `email` に一意制約がないため、スタッフを追加するとログイン名や
+連絡先が重複しうる。また、初期パスワードを本人が変更済みかを表す値もない。
+
 ## 対応：マイグレーションで bcrypt に移行する
 
 `db/init` の SQL は sakila のオリジナルなので**直接書き換えない**。
@@ -52,13 +57,26 @@ Drizzle のマイグレーションとして別途適用する。
 -- 1. bcrypt (60文字) が入るようにカラムを拡張
 ALTER TABLE staff MODIFY password VARCHAR(255) NULL;
 
--- 2. 両スタッフに既知のパスワードを設定（アプリ側で bcrypt ハッシュを生成して流し込む）
+-- 2. 初回パスワード変更を表す列と一意制約を追加
+ALTER TABLE staff
+  ADD COLUMN must_change_password BOOLEAN NOT NULL DEFAULT TRUE,
+  ADD CONSTRAINT uq_staff_username UNIQUE (username),
+  ADD CONSTRAINT uq_staff_email UNIQUE (email);
+
+-- 3. 両スタッフに既知のパスワードを設定（アプリ側で bcrypt ハッシュを生成して流し込む）
 --    開発用の初期パスワードは .env などで管理し、SQL にはハードコードしない
-UPDATE staff SET password = :hashedPassword WHERE staff_id IN (1, 2);
+UPDATE staff
+SET password = :hashedPassword,
+    must_change_password = TRUE
+WHERE staff_id IN (1, 2);
 ```
 
 ハッシュ生成はマイグレーション用スクリプト（`scripts/reset-staff-password.ts` など）で行う。
 `bcryptjs` か `@node-rs/bcrypt` を使う。
+
+UNIQUE 制約を追加する前に、既存の `username` と非NULLの `email` に重複がないことを
+確認する。制約追加後、スタッフ登録時の重複エラーは「ユーザー名またはメールアドレスは
+既に使われています」として扱う。
 
 ### なぜ SHA1 との互換を残さないか
 
@@ -92,6 +110,7 @@ Credentials Provider は database session に対応していないため、実�
 | `storeId` | number | 既定の店舗絞り込み |
 | `name` | string | ヘッダー表示 |
 | `username` | string | ヘッダー表示 |
+| `mustChangePassword` | boolean | 初回パスワード変更への強制遷移 |
 
 `staffId` と `storeId` をセッションに入れておくと、
 Server Action で毎回 `staff` を引き直す必要がなくなる。
@@ -110,6 +129,7 @@ declare module 'next-auth' {
       storeId: number
       username: string
       name: string
+      mustChangePassword: boolean
     }
   }
 }
@@ -119,6 +139,7 @@ declare module 'next-auth/jwt' {
     staffId: number
     storeId: number
     username: string
+    mustChangePassword: boolean
   }
 }
 ```
@@ -170,6 +191,20 @@ sequenceDiagram
 ユーザーが見つからなくてもダミーのハッシュに対して `bcrypt.compare` を実行し、
 処理時間を揃えるのが定石。2名のアプリで実害はないが、
 書き方を知っておく価値はある。
+
+## 初回パスワード変更
+
+スタッフを登録・再有効化・パスワード再発行した直後は
+`must_change_password = true` とする。認証成功後、この値を JWT / Session に含め、
+該当するスタッフは `/account/password` へリダイレクトする。
+
+パスワード変更画面では現在のパスワードと新しいパスワードを検証し、bcrypt ハッシュを
+更新して `must_change_password = false` にする。変更後は一度サインアウトさせて
+再ログインを求め、古い JWT に残ったフラグを確実に更新する。
+
+この状態のスタッフは、パスワード変更とログアウト以外の Server Action を実行できない。
+各 Action の `requireSession()` は、セッションだけでなく DB 上の `staff.active` と
+`must_change_password` も確認する。
 
 ## 画面の保護
 
@@ -248,16 +283,25 @@ sakila の `staff` には役職や権限を表すカラムがない。
 機能として入れてもよいが、権限ではなく**既定のフィルタ**として扱う。
 他店舗のデータも見られるが、初期表示は自分の店舗、という形。
 
+### スタッフ管理の認可
+
+スタッフ管理だけは例外として、各店舗の店長に限定する。
+`store.manager_staff_id` がログイン中の `staff_id` と一致する場合に限り、
+その店舗に所属するスタッフの登録・編集・無効化・パスワード再発行を許可する。
+
+店長の判定は JWT に保存せず、Action ごとに DB を参照する。これにより店長移管後の
+古いセッションで管理操作ができる問題を防ぐ。
+
 ## 環境変数
 
 | 変数 | 用途 |
 |---|---|
 | `AUTH_SECRET` | JWT の署名鍵。`openssl rand -base64 32` で生成 |
 | `DATABASE_URL` | `mysql://root:sakila@localhost:3306/sakila` |
-| `APP_TODAY` | 集計の基準日（[04-features.md](./04-features.md) F-02 参照） |
+| `APP_TODAY` | 集計・更新の UTC 基準時刻（[04-features.md](./04-features.md) F-02 参照） |
 
 `.env.local` に置き、`.gitignore` で除外する。
-`docker-compose.yml` のパスワードは学習用に平文で書かれているが、
+`compose.yml` のパスワードは学習用に平文で書かれているが、
 アプリ側の `.env.local` はコミットしない習慣をつけておく。
 
 ## 実装の順序
@@ -268,7 +312,8 @@ sakila の `staff` には役職や権限を表すカラムがない。
 | 2 | 両スタッフのパスワードを bcrypt で再設定するスクリプト |
 | 3 | Auth.js の設定（`lib/auth.ts`）と型拡張 |
 | 4 | ログイン画面 |
-| 5 | `(dashboard)/layout.tsx` でのセッション検証 |
-| 6 | Server Action 用のセッション検証ヘルパー |
+| 5 | 初回パスワード変更画面と強制リダイレクト |
+| 6 | `(dashboard)/layout.tsx` でのセッション検証 |
+| 7 | Server Action 用のセッション検証・店長認可ヘルパー |
 
 ここまで終えれば、以降の画面はすべて保護された状態で作り始められる。

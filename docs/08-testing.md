@@ -58,10 +58,9 @@ USE sakila;
 **別コンテナを別ポートで立てる**ほうが素直。
 
 ```yaml
-# docker-compose.yml に追加
+# compose.yml の既存サービス
   mysql-test:
     image: mysql:8.0
-    container_name: hajimete-no-sql-mysql-test
     environment:
       MYSQL_ROOT_PASSWORD: sakila
       MYSQL_DATABASE: sakila
@@ -81,7 +80,8 @@ USE sakila;
 
 名前付きボリュームを付けず `tmpfs` にしておくと、
 コンテナを作り直すだけで完全な初期状態に戻せる。
-テストデータが壊れたときの復旧が `docker compose down mysql-test && docker compose up -d mysql-test` で済む。
+テストデータが壊れたときは、`docker compose rm -sf mysql-test` の後に
+`docker compose up -d mysql-test` を実行すれば初期状態へ戻せる。
 
 接続先は環境変数で切り替える。
 
@@ -89,6 +89,15 @@ USE sakila;
 DATABASE_URL=mysql://root:sakila@localhost:3306/sakila       # .env.local
 DATABASE_URL=mysql://root:sakila@localhost:3307/sakila       # .env.test
 ```
+
+### 開発DBとのスキーマ同期
+
+初期化SQLで作られるのはオリジナルの sakila スキーマだけである。`staff.password` の拡張や
+初期パスワード設定など、Drizzle マイグレーションで加えた変更はテスト用DBにも適用する。
+
+テスト用コンテナを作り直した後は、`.env.test` を読み込んだ状態で開発DBと同じ
+マイグレーションを一度だけ実行してからテストを始める。各テストの前に実行すると遅く、
+開発DBだけに適用すると認証・スキーマの検証結果が一致しない。
 
 ## 更新系テストの分離
 
@@ -201,6 +210,20 @@ export default defineConfig({
 })
 ```
 
+Vitest は Next.js の実行環境ではないため、`.env.test` を自動では読み込まない。
+`tests/setup.ts` の先頭で `@next/env` を使い、DB モジュールを import する前に読み込む。
+
+```ts
+// tests/setup.ts
+import { loadEnvConfig } from '@next/env'
+
+loadEnvConfig(process.cwd(), false)
+```
+
+`NODE_ENV=test` では `.env.local` は読み込まれない。開発DBに誤接続しないための
+仕様なので、`.env.test` には `DATABASE_URL` と、Auth.js を import するテスト用の
+`AUTH_SECRET` を必ず定義する。値は [09-dev-setup.md](./09-dev-setup.md) を参照。
+
 ### `fileParallelism: false` の理由
 
 更新系テストが並列に走ると、同じ行に対するロックで待ち合わせが発生し、
@@ -216,9 +239,9 @@ DB が要らない層1のテストは高速なので、分けて実行できる�
 
 | コマンド | 対象 |
 |---|---|
-| `vitest run tests/unit` | 層1のみ。DB不要、数百ミリ秒 |
-| `vitest run tests/db` | 層2・3。DB必要 |
-| `vitest run` | 全部 |
+| `pnpm test:unit` | 層1のみ。DB不要、数百ミリ秒 |
+| `pnpm test:db` | 層2・3。DB必要 |
+| `pnpm test` | 全部 |
 
 ## テストの書き方
 
@@ -302,11 +325,19 @@ Drizzle には明示的な rollback API もあるが、
 | `performRental` | `rental` と `payment` が対で作られる |
 | | `payment.amount` が `film.rental_rate` と一致する |
 | | 在庫がない作品では失敗する |
+| | 同じ在庫1件への同時実行では、成功する処理が1件だけになる |
 | | 途中で失敗したとき `rental` も残らない |
 | `returnRental` | `return_date` が入る |
 | | **既に返却済みなら更新件数が0になる** |
 | `registerCustomer` | `address` と `customer` が両方作られる |
 | | 失敗時に `address` だけ残らない |
+| `deactivateCustomer` | 未返却レンタルがある顧客は無効化できない |
+| | 無効化後の顧客は新規レンタルできず、再有効化後はできる |
+| `registerStaff` | `address` と `staff` が両方作られ、 `must_change_password = true` になる |
+| `deactivateStaff` | 自分自身と店長を移管なしで無効化できない |
+| `reactivateStaff` | bcrypt ハッシュを更新し、初回変更フラグを true に戻す |
+| `resetStaffPassword` | bcrypt ハッシュを更新し、初回変更フラグを true に戻す |
+| スタッフ管理の認可 | 別店舗の店長・一般スタッフは対象スタッフを変更できない |
 
 「失敗時に片方だけ残らない」の検証がトランザクションテストの本題。
 わざと失敗する入力を与えて、DB が元の状態に戻ることを確認する。
@@ -377,7 +408,7 @@ Playwright を入れればログイン〜レンタル受付の通しを検証で
 
 | 順 | 内容 |
 |---|---|
-| 1 | `docker-compose.yml` にテスト用サービスを追加 |
+| 1 | `compose.yml` のテスト用サービスを確認 |
 | 2 | Vitest 導入と `vitest.config.ts` |
 | 3 | `tests/setup.ts`（接続と後始末） |
 | 4 | 層1: Zod スキーマのテスト（DB不要で手応えが早い） |
