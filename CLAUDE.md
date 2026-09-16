@@ -43,7 +43,7 @@ src/
 │       ├── ui/                # shadcn/ui 生成物（直接編集してよいが再生成で上書きされる）
 │       └── <shared>.tsx       # ドメインを問わず使う共通 UI
 ├── db/
-│   ├── schema/                # Drizzle スキーマ（テーブルごとに分割）
+│   ├── schema.ts              # Drizzle スキーマ（単一ファイル）
 │   └── index.ts               # db インスタンス・Executor 型
 ├── features/
 │   └── <name>/
