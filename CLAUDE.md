@@ -26,6 +26,8 @@ Next.js 16（App Router）+ TypeScript + Drizzle ORM + MySQL 8.0（Docker）。
 認証は Auth.js v5 Credentials Provider で `staff` テーブルを直接ログインユーザーとして使う。
 フォームは Conform + Zod + Server Actions。UIは shadcn/ui。Lint/Formatは Biome。
 
+- **Conform × Zod v4**: `@conform-to/zod` は Zod v4 向けサブパスを使う。`@conform-to/zod` ではなく `@conform-to/zod/v4` からインポートする。
+
 ### ディレクトリ構成
 
 ```

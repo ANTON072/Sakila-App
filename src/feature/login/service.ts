@@ -2,7 +2,7 @@ import bcrypt from "bcryptjs";
 import { eq } from "drizzle-orm";
 import { db, type Executer } from "@/db";
 import { staff } from "@/db/schema";
-import { credentialSchema } from "./schema";
+import { loginSchema } from "./schema";
 
 export async function authenticateStaff(
   credentials: unknown,
@@ -10,7 +10,7 @@ export async function authenticateStaff(
 ) {
   const ERROR_MESSAGE = "Invalid credentials";
 
-  const parsed = credentialSchema.safeParse(credentials);
+  const parsed = loginSchema.safeParse(credentials);
   if (!parsed.success) throw new Error(ERROR_MESSAGE);
 
   const { username, password } = parsed.data;
