@@ -11,7 +11,8 @@
     "typecheck": "tsc --noEmit",
     "check": "biome check --write",
     "studio": "drizzle-kit studio",
-    "seed:passwords": "tsx scripts/seed-passwords.ts"
+    "seed:passwords": "tsx scripts/seed-passwords.ts",
+    "postinstall": "lefthook install"
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",

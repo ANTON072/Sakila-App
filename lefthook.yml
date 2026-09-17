@@ -3,5 +3,5 @@ pre-commit:
   commands:
     lint:
       run: ./node_modules/.bin/biome check .
-    type-check:
+    typecheck:
       run: ./node_modules/.bin/tsc --noEmit
