@@ -8,6 +8,7 @@
     "start": "next start",
     "test": "vitest run",
     "lint": "biome check",
+    "typecheck": "tsc --noEmit",
     "check": "biome check --write",
     "studio": "drizzle-kit studio",
     "seed:passwords": "tsx scripts/seed-passwords.ts"
@@ -44,6 +45,7 @@
     "@vitejs/plugin-react": "^6.1.1",
     "drizzle-kit": "1.0.0-rc.4",
     "jsdom": "^30.0.1",
+    "lefthook": "^2.1.14",
     "tailwindcss": "^4",
     "tsx": "^4.23.13",
     "typescript": "^5",

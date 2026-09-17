@@ -1,0 +1,7 @@
+pre-commit:
+  parallel: true
+  commands:
+    lint:
+      run: ./node_modules/.bin/biome check .
+    type-check:
+      run: ./node_modules/.bin/tsc --noEmit

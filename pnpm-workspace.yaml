@@ -2,5 +2,6 @@ allowBuilds:
   '@parcel/watcher': true
   '@swc/core': true
   esbuild: true
+  lefthook: set this to true or false
   sharp: false
   unrs-resolver: false
