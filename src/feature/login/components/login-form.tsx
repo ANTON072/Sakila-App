@@ -1,3 +1,8 @@
+"use client";
+
+import { getFormProps, getInputProps, useForm } from "@conform-to/react";
+import { parseWithZod } from "@conform-to/zod/v4";
+import { useActionState } from "react";
 import {
   Button,
   Card,
@@ -6,39 +11,53 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
   Input,
-  Label,
 } from "@/common";
+import { login } from "../action";
+import { loginSchema } from "../schema";
 
 export function LoginForm() {
+  const [lastResult, action, isPending] = useActionState(login, undefined);
+  const [form, fields] = useForm({
+    lastResult,
+    onValidate({ formData }) {
+      return parseWithZod(formData, { schema: loginSchema });
+    },
+    shouldValidate: "onBlur",
+    shouldRevalidate: "onInput",
+  });
+
   return (
-    <form>
+    <form {...getFormProps(form)} action={action} noValidate>
       <Card>
         <CardHeader>
           <CardTitle className="text-center">Login to your account</CardTitle>
           <CardDescription>
-            Enter your email below to login to your account
+            Enter your username below to login to your account
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-col gap-6">
-            <div className="grid gap-2">
-              <Label htmlFor="email">Email</Label>
+          <FieldGroup>
+            <Field data-invalid={!!fields.username.errors?.length}>
+              <FieldLabel>Username</FieldLabel>
+              <Input {...getInputProps(fields.username, { type: "text" })} />
+              <FieldError>{fields.username.errors}</FieldError>
+            </Field>
+            <Field data-invalid={!!fields.password.errors?.length}>
+              <FieldLabel>Password</FieldLabel>
               <Input
-                id="email"
-                type="email"
-                placeholder="m@example.com"
-                required
+                {...getInputProps(fields.password, { type: "password" })}
               />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="password">Password</Label>
-              <Input id="password" type="password" required />
-            </div>
-          </div>
+              <FieldError>{fields.password.errors}</FieldError>
+            </Field>
+          </FieldGroup>
         </CardContent>
         <CardFooter className="flex-col gap-2">
-          <Button type="submit" className="w-full">
+          <Button type="submit" className="w-full" disabled={isPending}>
             Login
           </Button>
         </CardFooter>
