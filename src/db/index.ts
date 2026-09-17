@@ -9,3 +9,7 @@ if (!databaseUrl) throw new Error("DATABASE_URL is not set");
 // コールバック版 Pool を明示的に渡す（drizzle が .promise() で変換する）
 const pool = mysql.createPool(databaseUrl);
 export const db = drizzle({ client: pool });
+
+export type Executer =
+  | typeof db
+  | Parameters<Parameters<typeof db.transaction>[0]>[0];
