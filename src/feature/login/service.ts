@@ -2,7 +2,7 @@ import bcrypt from "bcryptjs";
 import { eq } from "drizzle-orm";
 import { db, type Executer } from "@/db";
 import { staff } from "@/db/schema";
-import { loginSchema } from "@/feature/login";
+import { loginSchema } from "./schema";
 
 export async function authenticateStaff(
   credentials: unknown,
