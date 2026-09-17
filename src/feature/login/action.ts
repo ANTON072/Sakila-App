@@ -13,7 +13,7 @@ export async function login(_: unknown, formData: FormData) {
 
   try {
     await signIn("credentials", {
-      ...Object.fromEntries(formData),
+      ...submission.value,
       redirectTo: "/",
     });
   } catch (error) {
