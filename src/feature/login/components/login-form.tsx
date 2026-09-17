@@ -57,7 +57,7 @@ export function LoginForm() {
           </FieldGroup>
         </CardContent>
         <CardFooter className="flex-col gap-2">
-          {form.errors && (
+          {(form.errors?.length ?? 0) > 0 && (
             <p className="text-sm text-destructive">{form.errors}</p>
           )}
           <Button type="submit" className="w-full" disabled={isPending}>
