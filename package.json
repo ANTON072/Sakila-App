@@ -10,6 +10,8 @@
     "lint": "biome check",
     "typecheck": "tsc --noEmit",
     "check": "biome check --write",
+    "db:migrate": "drizzle-kit migrate",
+    "db:gen": "drizzle-kit generate",
     "studio": "drizzle-kit studio",
     "seed:passwords": "tsx scripts/seed-passwords.ts",
     "postinstall": "lefthook install"
