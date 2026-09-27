@@ -22,12 +22,12 @@ export function UserMenu({ label }: { label: string }) {
       <DropdownMenuContent align="end">
         <DropdownMenuItem render={<Link href="/account/password" />}>
           <KeyRound />
-          パスワード変更
+          Change Password
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => logout()}>
           <LogOut />
-          ログアウト
+          Log Out
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

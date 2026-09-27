@@ -21,7 +21,7 @@ export default async function ProtectedLayout({
     <SidebarProvider defaultOpen={defaultOpen}>
       <AppSidebar />
       <SidebarInset>
-        <AppHeader userLabel={session.user?.name ?? "スタッフ"} />
+        <AppHeader userLabel={session.user?.name ?? "Staff"} />
         <div className="flex-1 p-6">{children}</div>
       </SidebarInset>
     </SidebarProvider>

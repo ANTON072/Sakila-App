@@ -37,36 +37,34 @@ type NavItem = {
 };
 
 const mainNav: NavItem[] = [
-  { title: "ダッシュボード", href: "/", icon: LayoutDashboard },
-  { title: "作品", href: "/films", icon: Film },
-  { title: "俳優", href: "/actors", icon: Clapperboard },
-  { title: "顧客", href: "/customers", icon: Users },
+  { title: "Dashboard", href: "/", icon: LayoutDashboard },
+  { title: "Films", href: "/films", icon: Film },
+  { title: "Actors", href: "/actors", icon: Clapperboard },
+  { title: "Customers", href: "/customers", icon: Users },
   {
-    title: "レンタル",
+    title: "Rentals",
     href: "/rentals",
     icon: ReceiptText,
     children: [
-      { title: "一覧", href: "/rentals" },
-      { title: "新規貸出", href: "/rentals/new" },
-      { title: "未返却", href: "/rentals/outstanding" },
+      { title: "All Rentals", href: "/rentals" },
+      { title: "New Rental", href: "/rentals/new" },
+      { title: "Outstanding", href: "/rentals/outstanding" },
     ],
   },
-  { title: "在庫", href: "/inventory", icon: Package },
+  { title: "Inventory", href: "/inventory", icon: Package },
   {
-    title: "レポート",
+    title: "Reports",
     href: "/reports/sales",
     icon: BarChart3,
     children: [
-      { title: "売上", href: "/reports/sales" },
-      { title: "顧客", href: "/reports/customers" },
-      { title: "作品", href: "/reports/films" },
+      { title: "Sales", href: "/reports/sales" },
+      { title: "Customers", href: "/reports/customers" },
+      { title: "Films", href: "/reports/films" },
     ],
   },
 ];
 
-const adminNav: NavItem[] = [
-  { title: "スタッフ", href: "/staff", icon: UserCog },
-];
+const adminNav: NavItem[] = [{ title: "Staff", href: "/staff", icon: UserCog }];
 
 function isActivePath(pathname: string, href: string) {
   if (href === "/") return pathname === "/";
@@ -122,7 +120,7 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
         <SidebarGroup>
-          <SidebarGroupLabel>管理</SidebarGroupLabel>
+          <SidebarGroupLabel>Admin</SidebarGroupLabel>
           <SidebarGroupContent>
             <NavMenu items={adminNav} pathname={pathname} />
           </SidebarGroupContent>
