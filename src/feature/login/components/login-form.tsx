@@ -2,7 +2,7 @@
 
 import { getFormProps, getInputProps, useForm } from "@conform-to/react";
 import { parseWithZod } from "@conform-to/zod/v4";
-import { useActionState } from "react";
+import { startTransition, useActionState } from "react";
 import {
   Button,
   Card,
@@ -27,12 +27,16 @@ export function LoginForm() {
     onValidate({ formData }) {
       return parseWithZod(formData, { schema: loginSchema });
     },
+    onSubmit(event, { formData }) {
+      event.preventDefault();
+      startTransition(() => action(formData));
+    },
     shouldValidate: "onBlur",
     shouldRevalidate: "onInput",
   });
 
   return (
-    <form {...getFormProps(form)} action={action} noValidate>
+    <form {...getFormProps(form)} noValidate>
       <Card>
         <CardHeader>
           <CardTitle className="text-center">Login to your account</CardTitle>
