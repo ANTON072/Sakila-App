@@ -36,9 +36,7 @@ export async function authenticateStaff(
 
   return {
     id: String(staffMember.staffId),
-    firstName: staffMember.firstName,
-    lastName: staffMember.lastName,
+    name: staffMember.username,
     email: staffMember.email,
-    picture: staffMember.picture,
   };
 }
